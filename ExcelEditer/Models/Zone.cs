@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace ExcelEditer.Models;
+namespace ExcelEditor.Models;
 
 public partial class Zone
 {

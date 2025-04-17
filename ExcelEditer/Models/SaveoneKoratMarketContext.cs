@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
-namespace ExcelEditer.Models;
+namespace ExcelEditor.Models;
 
 public partial class SaveoneKoratMarketContext : DbContext
 {

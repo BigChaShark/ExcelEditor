@@ -1,5 +1,5 @@
-using ExcelEditer;
-using ExcelEditer.Models;
+using ExcelEditor;
+using ExcelEditor.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 
@@ -7,11 +7,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+builder.Services.AddSession();
 
 builder.Services.AddDbContext<SaveoneKoratMarketContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
+app.UseSession();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -25,7 +27,6 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
 app.UseAuthorization();
 app.MapRazorPages();
 app.Run();

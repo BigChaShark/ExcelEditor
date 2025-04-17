@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml;
 using Microsoft.EntityFrameworkCore;
-using ExcelEditer;
+using ExcelEditor;
 
 public class IndexModel : PageModel
 {
@@ -63,15 +63,27 @@ public class IndexModel : PageModel
         //var newFilePath = Path.Combine(uploadDir, newFileName);
 
         //System.IO.File.Move(originalFilePath, newFilePath);
-
+        HttpContext.Session.SetString("FilePath", originalFilePath);
         TempData["FilePath"] = originalFilePath;
         TempData["Success"] = true;
 
         return Page();
     }
+    //public IActionResult OnGetDownloadFile()
+    //{
+    //    var filePath = TempData["FilePath"] as string;
+    //    if (string.IsNullOrEmpty(filePath) || !System.IO.File.Exists(filePath))
+    //    {
+    //        return NotFound();
+    //    }
+
+    //    var fileBytes = System.IO.File.ReadAllBytes(filePath);
+    //    var fileName = Path.GetFileName(filePath);
+    //    return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+    //}
     public IActionResult OnGetDownloadFile()
     {
-        var filePath = TempData["FilePath"] as string;
+        var filePath = HttpContext.Session.GetString("FilePath");
         if (string.IsNullOrEmpty(filePath) || !System.IO.File.Exists(filePath))
         {
             return NotFound();
