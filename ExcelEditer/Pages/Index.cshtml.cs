@@ -28,11 +28,12 @@ public class IndexModel : PageModel
 
     public class Market
     {
-        public int LogID { get; set; }
+        public int LogeIndex { get; set; }
+        public int LogeID { get; set; }
         public string LogeName { get; set; }
         public int LogeZone { get; set; }
         public int LogeSeqNum { get; set; }
-        public bool IsReserve { get; set; } = false;
+        public int IsReserve { get; set; } // 1 = not reserve , 0 = reserve
         public bool IsCorner { get; set; } = false;
         public int Row { get; set; }
     }
@@ -41,10 +42,9 @@ public class IndexModel : PageModel
     {
         using (var db = new SaveoneKoratMarketContext())
         {
-            string phone = "0957597832";
-            var member = db.Members.FirstOrDefault(m => m.Mobile == phone);
             DateTime currentDate = DateTime.Now;
             DateTime nextDate = currentDate.AddDays(2);
+
             int openCase = 0;
             switch (nextDate.DayOfWeek.ToString().ToLower())
             {
@@ -57,46 +57,58 @@ public class IndexModel : PageModel
                 case "sunday": openCase = 7; break;
                 default: break;
             }
-            var logeTempMasters = db.LogeTempMasters.Where(x => (x.Loge.LogeGroup.SubZoneId == 43 || x.Loge.LogeGroup.SubZoneId == 45 || x.Loge.LogeGroup.SubZoneId == 46) && x.OpenCase == openCase).ToList();
-            if (logeTempMasters != null)
-            {
-                Console.WriteLine("This many" + logeTempMasters.Count);
 
-                var loge43 = db.LogeTempMasters
-                    .Include(x => x.Loge)
-                    .ThenInclude(l => l.LogeGroup)
-                    .Where(x => x.Loge.LogeGroup.SubZoneId == 43 && x.OpenCase == openCase)
-                    .ToList();
-                List<Market> markets43 = new List<Market>();
-                List<Market> marketsMM = new List<Market>();
-                int row = 1;
-                int rowCount = 0;
-                int index = 0;
-                foreach (var item in loge43)
+            var logeTempCurrent = db.LogeTempOfflines.Where(x => x.OpenDateInt.Day == nextDate.Day && x.OpenDateInt.Month == nextDate.Month && x.OpenDateInt.Year == nextDate.Year).ToList();
+
+            using (var context = new SaveoneKoratMarketContext())
+            {
+                using (var dbContextTransaction = context.Database.BeginTransaction())
                 {
-                    rowCount += 1;
-                    var seqNum = item.Loge.LogeGroup.GroupSeqNo;
-                    var name = item.LogeName;
-                    var zone = item.Loge.LogeGroup.SubZoneId;
-                    var isReserve = item.Status;
-                    var iscorner = index%10 == 0 || index%10 == 9 ? true : false;
-                    markets43.Add(new Market { Row = row , IsCorner = iscorner , LogeName = name ,LogID = index});
-                    index += 1;
-                    if (rowCount == 10 )
+                    try
                     {
-                        row++;
-                        rowCount = 0;
+                        List<LogeTempOffline> logeTemps = new List<LogeTempOffline>();
+                        var logeTempMasters = context.LogeTempMasters
+                            .Where(x => (x.Loge.LogeGroup.SubZoneId == 43 || x.Loge.LogeGroup.SubZoneId == 45 || x.Loge.LogeGroup.SubZoneId == 46 || x.Loge.LogeGroup.SubZoneId == 50) &&
+                                        x.OpenCase == openCase && x.Status == 1)
+                            .ToList();
+
+                        foreach (var item in logeTempMasters)
+                        {
+                            var isDuplicate = logeTempCurrent.FirstOrDefault(x => x.LogeId == item.LogeId);
+                            if (isDuplicate == null)
+                                logeTemps.Add(new LogeTempOffline()
+                                {
+                                    IsConner = item.IsConner,
+                                    LogeId = item.LogeId,
+                                    LogeIndex = item.LogeIndex,
+                                    LogeName = item.LogeName,
+                                    LogeTypeId = item.LogeTypeId,
+                                    OpenDateInt = DateOnly.FromDateTime(nextDate),
+                                    Status = 0
+                                });
+                        }
+
+                        if (logeTemps.Count > 0)
+                        {
+                            context.LogeTempOfflines.AddRange(logeTemps);
+                            if (context.SaveChanges() >= 0)
+                                dbContextTransaction.Commit();
+                            else
+                            {
+                                dbContextTransaction.Rollback();
+                                context.Dispose();
+                            }
+
+
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        dbContextTransaction.Rollback();
+                        context.Dispose();
+
                     }
                 }
-                //marketsMM = markets43;
-                //foreach (var item in marketsMM)
-                //{
-                //    Console.WriteLine($"Row {item.Row}: {item.LogeName} {(item.IsCorner ? " (Corner)" : "")}");
-                //}
-            }
-            else
-            {
-                Console.WriteLine("xxxxx");
             }
         }
     }
@@ -135,15 +147,11 @@ public class IndexModel : PageModel
             case "sunday": openCase = 7; break;
             default: break;
         }
-        var db = new SaveoneKoratMarketContext();
-        var loge = db.LogeTempMasters.Where(x => (x.Loge.LogeGroup.SubZoneId == 43 
-                                                || x.Loge.LogeGroup.SubZoneId == 45 
-                                                || x.Loge.LogeGroup.SubZoneId == 46) && x.OpenCase == openCase).ToList();
         BookingSystem bookingSystem = new BookingSystem();
         var users = ReadUsersFromExcel(originalFilePath);
         bookingSystem.ShowAllLogs();
         bookingSystem.ReserveLogs(users);
-        bookingSystem.ShowUnreservedLogs();
+        bookingSystem.UpdateLogsToDB();
         bookingSystem.ShowAllUsers(users);
         //ProcessExcelFile(originalFilePath);
         FillUserLogIDsFromLogStore(originalFilePath, users);
@@ -277,6 +285,9 @@ public class IndexModel : PageModel
         private List<Market> markets46 = new List<Market>();
         private List<Market> marketsMain = new List<Market>();
         private int totalRows;
+        private int totalRows43;
+        private int totalRows45;
+        private int totalRows46;
 
         public BookingSystem()
         {
@@ -296,93 +307,119 @@ public class IndexModel : PageModel
             }
             var db = new SaveoneKoratMarketContext();
             var loge43 = db.LogeTempMasters
-                    .Include(x => x.Loge)
-                    .ThenInclude(l => l.LogeGroup)
-                    .Where(x => x.Loge.LogeGroup.SubZoneId == 43 && x.OpenCase == openCase)
-                    .ToList();
+                .Include(x => x.Loge)
+                .ThenInclude(l => l.LogeGroup)
+                .Where(x => x.Loge.LogeGroup.SubZoneId == 43 && x.OpenCase == openCase)
+                .OrderBy(x => x.Loge.LogeGroup.GroupSeqNo)
+                .ToList();
             var loge45 = db.LogeTempMasters
                     .Include(x => x.Loge)
                     .ThenInclude(l => l.LogeGroup)
                     .Where(x => x.Loge.LogeGroup.SubZoneId == 45 && x.OpenCase == openCase)
+                    .OrderBy(x => x.Loge.LogeGroup.GroupSeqNo)
                     .ToList();
             var loge46 = db.LogeTempMasters.Include(x => x.Loge)
                     .ThenInclude(l => l.LogeGroup)
                     .Where(x => x.Loge.LogeGroup.SubZoneId == 46 && x.OpenCase == openCase)
+                    .OrderBy(x => x.Loge.LogeGroup.GroupSeqNo)
                     .ToList();
             if (loge43 != null) 
             {
-                int row = 1;
-                int rowCount = 0;
+                var groupIndexes = loge43.Select((item, index) => new { item, index }).GroupBy(x => x.item.Loge.LogeGroup.GroupSeqNo).Select(g => new
+                {
+                    GroupSeqNo = g.Key,
+                    FirstIndex = g.First().index,
+                    LastIndex = g.Last().index
+                }).ToList();
                 int index = 0;
                 foreach (var item in loge43)
                 {
-                    rowCount += 1;
                     var seqNum = item.Loge.LogeGroup.GroupSeqNo;
                     var name = item.LogeName;
                     var zone = item.Loge.LogeGroup.SubZoneId;
                     var isReserve = item.Status;
-                    var iscorner = index % 10 == 0 || index % 10 == 9 ? true : false;
-                    markets43.Add(new Market { Row = row, IsCorner = iscorner, LogeName = name ,LogID = index });
-                    index += 1;
-                    if (rowCount == 10)
+                    bool isCorner = groupIndexes.Any(g => g.FirstIndex == index || g.LastIndex == index);
+                    markets43.Add(new Market
                     {
-                        row++;
-                        rowCount = 0;
-                    }
+                        Row = seqNum,
+                        IsCorner = isCorner,
+                        LogeName = name,
+                        LogeIndex = index,
+                        IsReserve = isReserve,
+                        LogeID = item.LogeId,
+                    });
+                    index += 1;
                 }
-                totalRows = row;
-                //foreach (var item in markets43)
-                //{
-                //    Console.WriteLine($"Row {item.Row}: {item.LogeName} {(item.IsCorner ? " (Corner)" : "")}");
-                //}
+                var maxGroupSeqNo = loge43.Select(x => x.Loge.LogeGroup.GroupSeqNo).Max();
+                totalRows43 = maxGroupSeqNo;
+                foreach (var item in markets43)
+                {
+                    Console.WriteLine($"Row {item.Row}: {item.LogeName} {(item.IsCorner ? " (Corner)" : "")} IsRS {item.IsReserve}");
+                }
             }
             if (loge45 != null)
             {
-                int row = 1;
-                int rowCount = 0;
+                var groupIndexes = loge45.Select((item, index) => new { item, index }).GroupBy(x => x.item.Loge.LogeGroup.GroupSeqNo).Select(g => new
+                {
+                    GroupSeqNo = g.Key,
+                    FirstIndex = g.First().index,
+                    LastIndex = g.Last().index
+                }).ToList();
                 int index = 0;
                 foreach (var item in loge45)
                 {
-                    rowCount += 1;
                     var seqNum = item.Loge.LogeGroup.GroupSeqNo;
                     var name = item.LogeName;
                     var zone = item.Loge.LogeGroup.SubZoneId;
                     var isReserve = item.Status;
-                    var iscorner = index % 10 == 0 || index % 10 == 9 ? true : false;
-                    markets45.Add(new Market { Row = row, IsCorner = iscorner, LogeName = name, LogID = index });
+                    bool isCorner = groupIndexes.Any(g => g.FirstIndex == index || g.LastIndex == index);
+                    markets45.Add(new Market 
+                    { 
+                        Row = seqNum, 
+                        IsCorner = isCorner, 
+                        LogeName = name, 
+                        LogeIndex = index , 
+                        IsReserve = isReserve, 
+                        LogeID = item.LogeId,
+                    });
                     index += 1;
-                    if (rowCount == 10)
-                    {
-                        row++;
-                        rowCount = 0;
-                    }
                 }
+                var maxGroupSeqNo = loge45.Select(x => x.Loge.LogeGroup.GroupSeqNo).Max();
+                totalRows45 = maxGroupSeqNo;
                 foreach (var item in markets45)
                 {
-                    Console.WriteLine($"Row {item.Row}: {item.LogeName} {(item.IsCorner ? " (Corner)" : "")}");
+                    Console.WriteLine($"Row {item.Row}: {item.LogeName} {(item.IsCorner ? " (Corner)" : "")} IsRS {item.IsReserve}");
                 }
             }
             if (loge46 != null)
             {
-                int row = 1;
-                int rowCount = 0;
+                var groupIndexes = loge46.Select((item, index) => new { item, index }).GroupBy(x => x.item.Loge.LogeGroup.GroupSeqNo).Select(g => new
+                {
+                    GroupSeqNo = g.Key,
+                    FirstIndex = g.First().index,
+                    LastIndex = g.Last().index
+                }).ToList();
                 int index = 0;
                 foreach (var item in loge46)
                 {
-                    rowCount += 1;
                     var seqNum = item.Loge.LogeGroup.GroupSeqNo;
                     var name = item.LogeName;
                     var zone = item.Loge.LogeGroup.SubZoneId;
                     var isReserve = item.Status;
-                    var iscorner = index % 10 == 0 || index % 10 == 9 ? true : false;
-                    markets46.Add(new Market { Row = row, IsCorner = iscorner, LogeName = name, LogID = index });
-                    index += 1;
-                    if (rowCount == 10)
+                    bool isCorner = groupIndexes.Any(g => g.FirstIndex == index || g.LastIndex == index);
+                    markets46.Add(new Market
                     {
-                        row++;
-                        rowCount = 0;
-                    }
+                        Row = seqNum,
+                        IsCorner = isCorner,
+                        LogeName = name,
+                        LogeIndex = index,
+                        IsReserve = isReserve,
+                        LogeID = item.LogeId,
+                    });
+                    index += 1;
                 }
+                var maxGroupSeqNo = loge46.Select(x => x.Loge.LogeGroup.GroupSeqNo).Max();
+                totalRows46 = maxGroupSeqNo;
                 //foreach (var item in markets46)
                 //{
                 //    Console.WriteLine($"Row {item.Row}: {item.LogeName} {(item.IsCorner ? " (Corner)" : "")}");
@@ -415,19 +452,23 @@ public class IndexModel : PageModel
             int currentRow46 = 1;
             foreach (var user in shuffledUsers)
             {
+                if (user.UserStatus == 1) continue;
                 if (user.zone == 43)
                 {
                     marketsMain = markets43;
+                    totalRows = totalRows43;
                     currentRow = currentRow43;
                 }
                 else if (user.zone == 45)
                 {
                     marketsMain = markets45;
+                    totalRows = totalRows45;
                     currentRow = currentRow45;
                 }
                 else if (user.zone == 46)
                 {
                     marketsMain = markets46;
+                    totalRows = totalRows46;
                     currentRow = currentRow46;
                 }
                 else
@@ -435,7 +476,6 @@ public class IndexModel : PageModel
                     Console.WriteLine($"UserID {user.UserID} zone not found");
                     continue;
                 }
-                if (user.UserStatus == 1) continue;
                 if (ReserveLogsForUserInRow(user, user.LogNum, currentRow))
                 {
                     currentRow += 1;
@@ -453,6 +493,7 @@ public class IndexModel : PageModel
                             if (user.zone == 43) currentRow43 = currentRow;
                             else if (user.zone == 45) currentRow45 = currentRow;
                             else if (user.zone == 46) currentRow46 = currentRow;
+                            break;
                         }
                     }
                 }
@@ -475,23 +516,30 @@ public class IndexModel : PageModel
             }
 
             var availableLogs = marketsMain
-                .Where(m => !m.IsReserve && (m.Row) == row)
-                .Select(m => m.LogID)
+                .Where(m => m.IsReserve == 1 && m.Row == row)
+                .Select(m => m.LogeIndex)
                 .ToList();
-
-            var selectedLogs = GetFirstConsecutiveLogs(availableLogs, logCount);
-            if (selectedLogs != null)
+            if (availableLogs.Count>0)
             {
-                var names = marketsMain.Where(m => selectedLogs.Contains(m.LogID)).Select(m => m.LogeName).ToList();
-                user.UserLogIDs.AddRange(selectedLogs);
-                user.UserLogNames.AddRange(names);
-                MarkLogsAsReserved(selectedLogs, user.zone);
-                user.UserStatus = 1;
-                Console.WriteLine($"UserID {user.UserID} RS {logCount} log SUC...: {string.Join(", ", selectedLogs)}");
-                return true;
+                var selectedLogs = GetFirstConsecutiveLogs(availableLogs, logCount);
+                if (selectedLogs != null)
+                {
+                    var names = marketsMain.Where(m => selectedLogs.Contains(m.LogeIndex)).Select(m => m.LogeName).ToList();
+                    user.UserLogIDs.AddRange(selectedLogs);
+                    user.UserLogNames.AddRange(names);
+                    MarkLogsAsReserved(selectedLogs, user.zone);
+                    user.UserStatus = 1;
+                    Console.WriteLine($"UserID {user.UserID} RS {logCount} log SUC...: {string.Join(", ", selectedLogs)}");
+                    return true;
+                }
+                Console.WriteLine($"UserID {user.UserID} Can't RS on Row {row}");
+                return false;
             }
-            Console.WriteLine($"UserID {user.UserID} Can't RS on Row {row}");
-            return false;
+            else
+            {
+                return false;
+            }
+
         }
 
         private List<int> GetFirstConsecutiveLogs(List<int> availableLogs, int logCount)
@@ -499,7 +547,7 @@ public class IndexModel : PageModel
             for (int i = 0; i <= availableLogs.Count - logCount; i++)
             {
                 var subset = availableLogs.Skip(i).Take(logCount).ToList();
-                if (IsConsecutive(subset) && CountCornerLogs(subset) <= 1)
+                if (subset.Count==logCount && IsConsecutive(subset) && CountCornerLogs(subset) <= 1)
                 {
                     return subset;
                 }
@@ -519,7 +567,7 @@ public class IndexModel : PageModel
 
         private int CountCornerLogs(List<int> logIDs)
         {
-            return logIDs.Count(logID => marketsMain.First(m => m.LogID == logID).IsCorner);
+            return logIDs.Count(logID => marketsMain.First(m => m.LogeIndex == logID).IsCorner);
         }
 
         private void MarkLogsAsReserved(List<int> logIDs , int zone)
@@ -528,32 +576,56 @@ public class IndexModel : PageModel
             foreach (var logID in logIDs)
             {
                 UpdateLogs(zoneID, logID);
-                //marketsMain.First(m => m.LogID == logID).IsReserve = true;
             }
         }
 
         public void UpdateLogs(int zone , int id)
         {
             if (zone == 43) {
-                marketsMain.First(m => m.LogID == id).IsReserve = true;
-                markets43.First(m => m.LogID == id).IsReserve = true;
+                marketsMain.First(m => m.LogeIndex == id).IsReserve = 0;
+                markets43.First(m => m.LogeIndex == id).IsReserve = 0;
             }
             else if (zone == 45) 
             { 
-                marketsMain.First(m => m.LogID == id).IsReserve = true;
-                markets45.First(m => m.LogID == id).IsReserve = true;
+                marketsMain.First(m => m.LogeIndex == id).IsReserve = 0;
+                markets45.First(m => m.LogeIndex == id).IsReserve = 0;
             }  
             else if (zone == 46)
             {
-                marketsMain.First(m => m.LogID == id).IsReserve = true;
-                markets46.First(m => m.LogID == id).IsReserve = true;
+                marketsMain.First(m => m.LogeIndex == id).IsReserve = 0;
+                markets46.First(m => m.LogeIndex == id).IsReserve = 0;
             }
         }
 
-        public void ShowUnreservedLogs()
+        public void UpdateLogsToDB()
         {
-            var unreservedLogs = marketsMain.Where(m => !m.IsReserve).Select(m => m.LogID).ToList();
-            Console.WriteLine($"Log No RS : {string.Join(", ", unreservedLogs)}");
+            //var combinedMarkets = markets43.Where(m => m.IsReserve == 0)
+            //    .Concat(markets45.Where(m => m.IsReserve == 0))
+            //    .Concat(markets46.Where(m => m.IsReserve == 0))
+            //    .ToList();
+            //foreach (var market in combinedMarkets)
+            //{
+            //    Console.WriteLine($"LogID: {market.LogeIndex}, LogeName: {market.LogeName}, IsReserve: {market.IsReserve}");
+            //}
+            //using (var db = new SaveoneKoratMarketContext())
+            //{
+            //    // ดึง LogeId จาก combinedMarkets
+            //    var logeIdsToUpdate = combinedMarkets.Select(m => m.LogeID).ToList();
+
+            //    // ค้นหา LogeTempOffline ที่มี LogeId ตรงกับ combinedMarkets และ Status == 0
+            //    var logeTempOfflinesToUpdate = db.LogeTempOfflines.Where(lto => logeIdsToUpdate.Contains(lto.LogeId) && lto.Status == 0).ToList();
+
+            //    // อัปเดตค่า Status เป็น 1
+            //    foreach (var logeTempOffline in logeTempOfflinesToUpdate)
+            //    {
+            //        logeTempOffline.Status = 1;
+            //    }
+
+            //    // บันทึกการเปลี่ยนแปลงลงในฐานข้อมูล
+            //    db.SaveChanges();
+            //}
+            //var unreservedLogs = marketsMain.Where(m => m.IsReserve == 1).Select(m => m.LogID).ToList();
+            //Console.WriteLine($"Log No RS : {string.Join(", ", unreservedLogs)}");
         }
 
         public void ShowAllUsers(List<UserModel> users)
