@@ -108,7 +108,7 @@
               "RelativeDocumentMoniker": "ExcelEditer\\Pages\\Index.cshtml.cs",
               "ToolTip": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\Index.cshtml.cs",
               "RelativeToolTip": "ExcelEditer\\Pages\\Index.cshtml.cs",
-              "ViewState": "AgIAAAUBAAAAAAAAAAAiwBMBAAAeAAAAAAAAAA==",
+              "ViewState": "AgIAADgAAAAAAAAAAAAkwHkBAABtAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-04-17T06:17:33.72Z",
               "EditorCaption": ""
@@ -183,8 +183,7 @@
               "RelativeToolTip": "ExcelEditer\\Models\\Loge.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAVAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-17T08:11:30.237Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-04-17T08:11:30.237Z"
             },
             {
               "$type": "Document",
@@ -196,8 +195,7 @@
               "RelativeToolTip": "ExcelEditer\\Pages\\Error.cshtml.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAVAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-17T08:11:28.913Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-04-17T08:11:28.913Z"
             },
             {
               "$type": "Document",
