@@ -23,6 +23,8 @@ public partial class SaveoneKoratMarketContext : DbContext
 
     public virtual DbSet<LogeTempOffline> LogeTempOfflines { get; set; }
 
+    public virtual DbSet<Member> Members { get; set; }
+
     public virtual DbSet<SubZone> SubZones { get; set; }
 
     public virtual DbSet<Zone> Zones { get; set; }
@@ -111,6 +113,200 @@ public partial class SaveoneKoratMarketContext : DbContext
                 .HasForeignKey(d => d.LogeId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_LogeTemp_Offline_Loge");
+        });
+
+        modelBuilder.Entity<Member>(entity =>
+        {
+            entity.ToTable("Member");
+
+            entity.Property(e => e.Address).IsUnicode(false);
+            entity.Property(e => e.AddressNo)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.BirthDate).HasColumnType("datetime");
+            entity.Property(e => e.Box1)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Box2)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Box3)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Box4)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Box5)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Code)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.District)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.Email)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.EndVipZone2Date).HasColumnType("datetime");
+            entity.Property(e => e.EndVipZone3Date).HasColumnType("datetime");
+            entity.Property(e => e.EndVipZone5Date).HasColumnType("datetime");
+            entity.Property(e => e.FacebookId)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.FirstName)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.IdCard)
+                .HasMaxLength(20)
+                .IsUnicode(false);
+            entity.Property(e => e.IdCard2)
+                .HasMaxLength(20)
+                .IsUnicode(false);
+            entity.Property(e => e.ImageCoverShopUrl)
+                .HasMaxLength(200)
+                .IsUnicode(false);
+            entity.Property(e => e.ImageHomeRegistrationUrl)
+                .HasMaxLength(200)
+                .IsUnicode(false);
+            entity.Property(e => e.ImageIdCardUrl)
+                .HasMaxLength(200)
+                .IsUnicode(false);
+            entity.Property(e => e.ImageLogoShopUrl)
+                .HasMaxLength(200)
+                .IsUnicode(false);
+            entity.Property(e => e.ImagePersonUrl)
+                .HasMaxLength(200)
+                .IsUnicode(false);
+            entity.Property(e => e.InstagramId)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.IsActive).HasDefaultValue(1);
+            entity.Property(e => e.IsAdmin).HasDefaultValue(0);
+            entity.Property(e => e.IsBkk).HasColumnName("isBKK");
+            entity.Property(e => e.IsDetechOneMoreIp).HasColumnName("IsDetechOneMoreIP");
+            entity.Property(e => e.IsLoginOtp).HasColumnName("IsLoginOTP");
+            entity.Property(e => e.IsOtpreservationLast4Idcard).HasColumnName("IsOTPReservationLast4IDCard");
+            entity.Property(e => e.IsPdpa).HasColumnName("IsPDPA");
+            entity.Property(e => e.IsResCon).HasDefaultValue(0);
+            entity.Property(e => e.IsResConMax).HasDefaultValue(0);
+            entity.Property(e => e.IsResConZone2).HasDefaultValue(0);
+            entity.Property(e => e.IsShowKtb).HasColumnName("IsShowKTB");
+            entity.Property(e => e.IsShowKtpregister)
+                .HasDefaultValue(0)
+                .HasColumnName("IsShowKTPRegister");
+            entity.Property(e => e.IsShowScb).HasColumnName("IsShowSCB");
+            entity.Property(e => e.IsShowScbregister)
+                .HasDefaultValue(0)
+                .HasColumnName("IsShowSCBRegister");
+            entity.Property(e => e.IsVipstatusZone2).HasColumnName("IsVIPStatusZone2");
+            entity.Property(e => e.IsVipstatusZone22).HasColumnName("IsVIPStatusZone2_2");
+            entity.Property(e => e.IsVipstatusZone3).HasColumnName("IsVIPStatusZone3");
+            entity.Property(e => e.IsVipstatusZone32).HasColumnName("IsVIPStatusZone3_2");
+            entity.Property(e => e.IsVipstatusZone5).HasColumnName("IsVIPStatusZone5");
+            entity.Property(e => e.IsVipstatusZone52).HasColumnName("IsVIPStatusZone5_2");
+            entity.Property(e => e.IsVipzone1)
+                .HasDefaultValue(0)
+                .HasColumnName("IsVIPZone1");
+            entity.Property(e => e.IsVipzone2)
+                .HasDefaultValue(0)
+                .HasColumnName("IsVIPZone2");
+            entity.Property(e => e.IsVipzone3).HasColumnName("IsVIPZone3");
+            entity.Property(e => e.IsVipzone4).HasColumnName("IsVIPZone4");
+            entity.Property(e => e.IsVipzone5).HasColumnName("IsVIPZone5");
+            entity.Property(e => e.LastName)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.LastUpdate).HasColumnType("datetime");
+            entity.Property(e => e.LastedReserve).HasColumnType("datetime");
+            entity.Property(e => e.LicensePlate)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.LockerNo)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.LockerNo2)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.LockerNo3)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.LockerNo4)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.LockerNo5)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Mobile)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Moo)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Name)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.NickName)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.OtherImageNo).IsUnicode(false);
+            entity.Property(e => e.Password)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Phone)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Pin)
+                .HasMaxLength(4)
+                .IsUnicode(false);
+            entity.Property(e => e.Postcode)
+                .HasMaxLength(10)
+                .IsUnicode(false);
+            entity.Property(e => e.Prefix)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.Province)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.RegisterDate).HasColumnType("datetime");
+            entity.Property(e => e.Remark).IsUnicode(false);
+            entity.Property(e => e.Road)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.ShopName)
+                .HasMaxLength(200)
+                .IsUnicode(false);
+            entity.Property(e => e.ShopType)
+                .HasMaxLength(200)
+                .IsUnicode(false);
+            entity.Property(e => e.ShopType1)
+                .HasMaxLength(200)
+                .IsUnicode(false)
+                .HasColumnName("ShopType_1");
+            entity.Property(e => e.ShopType2)
+                .HasMaxLength(200)
+                .IsUnicode(false)
+                .HasColumnName("ShopType_2");
+            entity.Property(e => e.ShopType3)
+                .HasMaxLength(200)
+                .IsUnicode(false)
+                .HasColumnName("ShopType_3");
+            entity.Property(e => e.Soi)
+                .HasMaxLength(200)
+                .IsUnicode(false);
+            entity.Property(e => e.SubDistrict)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.UserName)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Zone1).HasDefaultValue(0);
+            entity.Property(e => e.Zone2).HasDefaultValue(0);
+            entity.Property(e => e.Zone2Group)
+                .HasDefaultValue(0)
+                .HasColumnName("Zone2_Group");
+            entity.Property(e => e.Zone3Group).HasColumnName("Zone3_Group");
+            entity.Property(e => e.Zone5Group).HasColumnName("Zone5_Group");
         });
 
         modelBuilder.Entity<SubZone>(entity =>

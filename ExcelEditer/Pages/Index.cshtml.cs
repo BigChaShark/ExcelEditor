@@ -8,6 +8,8 @@ using System.Linq;
 using OfficeOpenXml;
 using Microsoft.EntityFrameworkCore;
 using ExcelEditor;
+using ExcelEditor.Models;
+using static IndexModel;
 
 public class IndexModel : PageModel
 {
@@ -26,8 +28,74 @@ public class IndexModel : PageModel
     public class Market
     {
         public int LogID { get; set; }
+        public string LogeName { get; set; }
+        public int LogeZone { get; set; }
+        public int LogeSeqNum { get; set; }
         public bool IsReserve { get; set; } = false;
         public bool IsCorner { get; set; } = false;
+        public int Row { get; set; }
+    }
+
+    public void OnGet()
+    {
+        using (var db = new SaveoneKoratMarketContext())
+        {
+            string phone = "0957597832";
+            var member = db.Members.FirstOrDefault(m => m.Mobile == phone);
+            DateTime currentDate = DateTime.Now;
+            DateTime nextDate = currentDate.AddDays(2);
+            int openCase = 0;
+            switch (nextDate.DayOfWeek.ToString().ToLower())
+            {
+                case "monday": openCase = 1; break;
+                case "tuesday": openCase = 2; break;
+                case "wednesday": openCase = 3; break;
+                case "thursday": openCase = 4; break;
+                case "friday": openCase = 5; break;
+                case "saturday": openCase = 6; break;
+                case "sunday": openCase = 7; break;
+                default: break;
+            }
+            var logeTempMasters = db.LogeTempMasters.Where(x => (x.Loge.LogeGroup.SubZoneId == 43 || x.Loge.LogeGroup.SubZoneId == 45 || x.Loge.LogeGroup.SubZoneId == 46) && x.OpenCase == openCase).ToList();
+            if (logeTempMasters != null)
+            {
+                Console.WriteLine("This many" + logeTempMasters.Count);
+
+                var loge43 = db.LogeTempMasters
+                    .Include(x => x.Loge)
+                    .ThenInclude(l => l.LogeGroup)
+                    .Where(x => x.Loge.LogeGroup.SubZoneId == 43 && x.OpenCase == openCase)
+                    .ToList();
+                List<Market> markets43 = new List<Market>();
+                int row = 1;
+                int rowCount = 0;
+                int index = 0;
+                foreach (var item in loge43)
+                {
+                    rowCount += 1;
+                    var seqNum = item.Loge.LogeGroup.GroupSeqNo;
+                    var name = item.LogeName;
+                    var zone = item.Loge.LogeGroup.SubZoneId;
+                    var isReserve = item.Status;
+                    var iscorner = index%10 == 0 || index%10 == 9 ? true : false;
+                    markets43.Add(new Market { Row = row , IsCorner = iscorner , LogeName = name});
+                    index += 1;
+                    if (rowCount == 10 )
+                    {
+                        row++;
+                        rowCount = 0;
+                    }
+                }
+                foreach (var item in markets43)
+                {
+                    Console.WriteLine($"Row {item.Row}: {item.LogeName} {(item.IsCorner ? " (Corner)" : "")}");
+                }
+            }
+            else
+            {
+                Console.WriteLine("xxxxx");
+            }
+        }
     }
 
     public async Task<IActionResult> OnPostProcessExcelAsync()
@@ -50,7 +118,24 @@ public class IndexModel : PageModel
         {
             await UploadedFile.CopyToAsync(stream);
         }
-
+        DateTime currentDate = DateTime.Now;
+        DateTime nextDate = currentDate.AddDays(2);
+        int openCase = 0;
+        switch (nextDate.DayOfWeek.ToString().ToLower())
+        {
+            case "monday": openCase = 1; break;
+            case "tuesday": openCase = 2; break;
+            case "wednesday": openCase = 3; break;
+            case "thursday": openCase = 4; break;
+            case "friday": openCase = 5; break;
+            case "saturday": openCase = 6; break;
+            case "sunday": openCase = 7; break;
+            default: break;
+        }
+        var db = new SaveoneKoratMarketContext();
+        var loge = db.LogeTempMasters.Where(x => (x.Loge.LogeGroup.SubZoneId == 43 
+                                                || x.Loge.LogeGroup.SubZoneId == 45 
+                                                || x.Loge.LogeGroup.SubZoneId == 46) && x.OpenCase == openCase).ToList();
         BookingSystem bookingSystem = new BookingSystem(2, 2, 4);
         var users = ReadUsersFromExcel(originalFilePath);
         bookingSystem.ShowAllLogs();
@@ -182,7 +267,10 @@ public class IndexModel : PageModel
     }
     public class BookingSystem
     {
-        private List<Market> markets = new List<Market>();
+        private List<Market> markets43 = new List<Market>();
+        private List<Market> markets45 = new List<Market>();
+        private List<Market> markets46 = new List<Market>();
+        private List<Market> marketsMain = new List<Market>();
         private int logsPerRow;
         private int columnsPerRow;
         private int totalRows;
@@ -198,14 +286,14 @@ public class IndexModel : PageModel
                 {
                     int logID = r * 100 + c;
                     bool isCorner = (c == 1 || c == logsPerRow || c == logsPerRow / columnsPerRow || c == logsPerRow / columnsPerRow * (columnsPerRow - 1) + 1);
-                    markets.Add(new Market { LogID = logID, IsCorner = isCorner });
+                    marketsMain.Add(new Market { LogID = logID, IsCorner = isCorner });
                 }
             }
         }
 
         public void ShowAllLogs()
         {
-            var groupedLogs = markets.GroupBy(m => m.LogID / 100).OrderBy(g => g.Key);
+            var groupedLogs = marketsMain.GroupBy(m => m.LogID / 100).OrderBy(g => g.Key);
             foreach (var row in groupedLogs)
             {
                 Console.WriteLine($"Row {row.Key}: {string.Join(", ", row.Select(m => m.LogID + (m.IsCorner ? " (Corner)" : "")))}");
@@ -249,7 +337,7 @@ public class IndexModel : PageModel
                 return false;
             }
 
-            var availableLogs = markets
+            var availableLogs = marketsMain
                 .Where(m => !m.IsReserve && (m.LogID / 100) == row)
                 .Select(m => m.LogID)
                 .ToList();
@@ -292,20 +380,20 @@ public class IndexModel : PageModel
 
         private int CountCornerLogs(List<int> logIDs)
         {
-            return logIDs.Count(logID => markets.First(m => m.LogID == logID).IsCorner);
+            return logIDs.Count(logID => marketsMain.First(m => m.LogID == logID).IsCorner);
         }
 
         private void MarkLogsAsReserved(List<int> logIDs)
         {
             foreach (var logID in logIDs)
             {
-                markets.First(m => m.LogID == logID).IsReserve = true;
+                marketsMain.First(m => m.LogID == logID).IsReserve = true;
             }
         }
 
         public void ShowUnreservedLogs()
         {
-            var unreservedLogs = markets.Where(m => !m.IsReserve).Select(m => m.LogID).ToList();
+            var unreservedLogs = marketsMain.Where(m => !m.IsReserve).Select(m => m.LogID).ToList();
             Console.WriteLine($"Log No RS : {string.Join(", ", unreservedLogs)}");
         }
 
