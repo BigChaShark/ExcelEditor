@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using ExcelEditor;
 using ExcelEditor.Models;
 using static IndexModel;
+using System.Text.RegularExpressions;
 
 public class IndexModel : PageModel
 {
@@ -68,8 +69,8 @@ public class IndexModel : PageModel
                     {
                         List<LogeTempOffline> logeTemps = new List<LogeTempOffline>();
                         var logeTempMasters = context.LogeTempMasters
-                            .Where(x => (x.Loge.LogeGroup.SubZoneId == 43 || x.Loge.LogeGroup.SubZoneId == 45 || x.Loge.LogeGroup.SubZoneId == 46 || x.Loge.LogeGroup.SubZoneId == 50) &&
-                                        x.OpenCase == openCase && x.Status == 1)
+                            .Where(x => (x.Loge.LogeGroup.SubZoneId == 43 || x.Loge.LogeGroup.SubZoneId == 45 || x.Loge.LogeGroup.SubZoneId == 46 || x.Loge.LogeGroup.SubZoneId == 49 || x.Loge.LogeGroup.SubZoneId == 50) &&
+                                        x.OpenCase == openCase && x.Status == 1 )
                             .ToList();
 
                         foreach (var item in logeTempMasters)
@@ -84,10 +85,9 @@ public class IndexModel : PageModel
                                     LogeName = item.LogeName,
                                     LogeTypeId = item.LogeTypeId,
                                     OpenDateInt = DateOnly.FromDateTime(nextDate),
-                                    Status = 0
+                                    Status = 0,
                                 });
                         }
-
                         if (logeTemps.Count > 0)
                         {
                             context.LogeTempOfflines.AddRange(logeTemps);
@@ -98,8 +98,6 @@ public class IndexModel : PageModel
                                 dbContextTransaction.Rollback();
                                 context.Dispose();
                             }
-
-
                         }
                     }
                     catch (Exception)
@@ -120,39 +118,24 @@ public class IndexModel : PageModel
             ModelState.AddModelError("UploadedFile", "Please upload a valid Excel file.");
             return Page();
         }
-
         var uploadDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
         if (!Directory.Exists(uploadDir))
         {
             Directory.CreateDirectory(uploadDir);
         }
-
         var originalFilePath = Path.Combine(uploadDir, UploadedFile.FileName);
 
         using (var stream = new FileStream(originalFilePath, FileMode.Create))
         {
             await UploadedFile.CopyToAsync(stream);
         }
-        DateTime currentDate = DateTime.Now;
-        DateTime nextDate = currentDate.AddDays(2);
-        int openCase = 0;
-        switch (nextDate.DayOfWeek.ToString().ToLower())
-        {
-            case "monday": openCase = 1; break;
-            case "tuesday": openCase = 2; break;
-            case "wednesday": openCase = 3; break;
-            case "thursday": openCase = 4; break;
-            case "friday": openCase = 5; break;
-            case "saturday": openCase = 6; break;
-            case "sunday": openCase = 7; break;
-            default: break;
-        }
         BookingSystem bookingSystem = new BookingSystem();
         var users = ReadUsersFromExcel(originalFilePath);
         bookingSystem.ShowAllLogs();
         bookingSystem.ReserveLogs(users);
-        bookingSystem.UpdateLogsToDB();
         bookingSystem.ShowAllUsers(users);
+        bookingSystem.ShowAllLogsDontRS();
+        bookingSystem.UpdateDB();
         //ProcessExcelFile(originalFilePath);
         FillUserLogIDsFromLogStore(originalFilePath, users);
         //var newFileName = Path.GetFileNameWithoutExtension(UploadedFile.FileName) + "Success" + Path.GetExtension(UploadedFile.FileName);
@@ -165,18 +148,6 @@ public class IndexModel : PageModel
 
         return Page();
     }
-    //public IActionResult OnGetDownloadFile()
-    //{
-    //    var filePath = TempData["FilePath"] as string;
-    //    if (string.IsNullOrEmpty(filePath) || !System.IO.File.Exists(filePath))
-    //    {
-    //        return NotFound();
-    //    }
-
-    //    var fileBytes = System.IO.File.ReadAllBytes(filePath);
-    //    var fileName = Path.GetFileName(filePath);
-    //    return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
-    //}
     public IActionResult OnGetDownloadFile()
     {
         var filePath = HttpContext.Session.GetString("FilePath");
@@ -306,22 +277,22 @@ public class IndexModel : PageModel
                 default: break;
             }
             var db = new SaveoneKoratMarketContext();
-            var loge43 = db.LogeTempMasters
+            var loge43 = db.LogeTempOfflines
                 .Include(x => x.Loge)
                 .ThenInclude(l => l.LogeGroup)
-                .Where(x => x.Loge.LogeGroup.SubZoneId == 43 && x.OpenCase == openCase)
-                .OrderBy(x => x.Loge.LogeGroup.GroupSeqNo)
+                .Where(x => x.Loge.LogeGroup.SubZoneId == 43 && (x.OpenDateInt == DateOnly.FromDateTime(nextDate)))
+                .OrderBy(x => x.Loge.LogeGroup.GroupSeqNo).ThenBy(x => x.LogeIndex)
                 .ToList();
-            var loge45 = db.LogeTempMasters
+            var loge45 = db.LogeTempOfflines
                     .Include(x => x.Loge)
                     .ThenInclude(l => l.LogeGroup)
-                    .Where(x => x.Loge.LogeGroup.SubZoneId == 45 && x.OpenCase == openCase)
-                    .OrderBy(x => x.Loge.LogeGroup.GroupSeqNo)
+                    .Where(x => x.Loge.LogeGroup.SubZoneId == 45 && (x.OpenDateInt == DateOnly.FromDateTime(nextDate)))
+                    .OrderBy(x => x.Loge.LogeGroup.GroupSeqNo).ThenBy(x => x.LogeIndex)
                     .ToList();
-            var loge46 = db.LogeTempMasters.Include(x => x.Loge)
+            var loge46 = db.LogeTempOfflines.Include(x => x.Loge)
                     .ThenInclude(l => l.LogeGroup)
-                    .Where(x => x.Loge.LogeGroup.SubZoneId == 46 && x.OpenCase == openCase)
-                    .OrderBy(x => x.Loge.LogeGroup.GroupSeqNo)
+                    .Where(x => (x.Loge.LogeGroup.SubZoneId == 46) && (x.OpenDateInt == DateOnly.FromDateTime(nextDate)) )
+                    .OrderBy(x => x.Loge.LogeGroup.GroupSeqNo).ThenBy(x => x.LogeIndex)
                     .ToList();
             if (loge43 != null) 
             {
@@ -344,9 +315,10 @@ public class IndexModel : PageModel
                         Row = seqNum,
                         IsCorner = isCorner,
                         LogeName = name,
-                        LogeIndex = index,
+                        LogeIndex = ExtractNumber(name),
                         IsReserve = isReserve,
                         LogeID = item.LogeId,
+                        LogeSeqNum = seqNum,
                     });
                     index += 1;
                 }
@@ -354,7 +326,7 @@ public class IndexModel : PageModel
                 totalRows43 = maxGroupSeqNo;
                 foreach (var item in markets43)
                 {
-                    Console.WriteLine($"Row {item.Row}: {item.LogeName} {(item.IsCorner ? " (Corner)" : "")} IsRS {item.IsReserve}");
+                    Console.WriteLine($"Row {item.Row}: {item.LogeName} {(item.IsCorner ? " (Corner)" : "")} IsSeq : {item.LogeSeqNum} Log Index : {item.LogeIndex}");
                 }
             }
             if (loge45 != null)
@@ -371,14 +343,14 @@ public class IndexModel : PageModel
                     var seqNum = item.Loge.LogeGroup.GroupSeqNo;
                     var name = item.LogeName;
                     var zone = item.Loge.LogeGroup.SubZoneId;
-                    var isReserve = item.Status;
+                    var isReserve = item.Status ;
                     bool isCorner = groupIndexes.Any(g => g.FirstIndex == index || g.LastIndex == index);
                     markets45.Add(new Market 
                     { 
                         Row = seqNum, 
                         IsCorner = isCorner, 
                         LogeName = name, 
-                        LogeIndex = index , 
+                        LogeIndex = ExtractNumber(name), 
                         IsReserve = isReserve, 
                         LogeID = item.LogeId,
                     });
@@ -388,7 +360,7 @@ public class IndexModel : PageModel
                 totalRows45 = maxGroupSeqNo;
                 foreach (var item in markets45)
                 {
-                    Console.WriteLine($"Row {item.Row}: {item.LogeName} {(item.IsCorner ? " (Corner)" : "")} IsRS {item.IsReserve}");
+                    Console.WriteLine($"Row {item.Row}: {item.LogeName} {(item.IsCorner ? " (Corner)" : "")} IsRS {item.IsReserve} Log Index : {item.LogeIndex}");
                 }
             }
             if (loge46 != null)
@@ -412,7 +384,7 @@ public class IndexModel : PageModel
                         Row = seqNum,
                         IsCorner = isCorner,
                         LogeName = name,
-                        LogeIndex = index,
+                        LogeIndex = ExtractNumber(name),
                         IsReserve = isReserve,
                         LogeID = item.LogeId,
                     });
@@ -420,12 +392,17 @@ public class IndexModel : PageModel
                 }
                 var maxGroupSeqNo = loge46.Select(x => x.Loge.LogeGroup.GroupSeqNo).Max();
                 totalRows46 = maxGroupSeqNo;
-                //foreach (var item in markets46)
-                //{
-                //    Console.WriteLine($"Row {item.Row}: {item.LogeName} {(item.IsCorner ? " (Corner)" : "")}");
-                //}
+                foreach (var item in markets46)
+                {
+                    Console.WriteLine($"Row {item.Row}: {item.LogeName} {(item.IsCorner ? " (Corner)" : "")} IsIndex {item.IsReserve} Log Index : {item.LogeIndex}");
+                }
             }
-            
+            int ExtractNumber(string input)
+            {
+                Match match = Regex.Match(input, @"\d+");
+                return match.Success ? int.Parse(match.Value) : 0;
+            }
+
 
         }
 
@@ -446,42 +423,35 @@ public class IndexModel : PageModel
         {
             Random random = new Random();
             var shuffledUsers = users.OrderBy(x => random.Next()).ToList();
-            int currentRow = 1;
-            int currentRow43 = 1;
-            int currentRow45 = 1;
-            int currentRow46 = 1;
+            int currentRow = 1 , currentRow43 = 1, currentRow45 = 1, currentRow46 = 1;
             foreach (var user in shuffledUsers)
             {
                 if (user.UserStatus == 1) continue;
-                if (user.zone == 43)
+                switch (user.zone)
                 {
-                    marketsMain = markets43;
-                    totalRows = totalRows43;
-                    currentRow = currentRow43;
-                }
-                else if (user.zone == 45)
-                {
-                    marketsMain = markets45;
-                    totalRows = totalRows45;
-                    currentRow = currentRow45;
-                }
-                else if (user.zone == 46)
-                {
-                    marketsMain = markets46;
-                    totalRows = totalRows46;
-                    currentRow = currentRow46;
-                }
-                else
-                {
-                    Console.WriteLine($"UserID {user.UserID} zone not found");
-                    continue;
+                    case 43:
+                        marketsMain = markets43;
+                        totalRows = totalRows43;
+                        currentRow = currentRow43;
+                        break;
+                    case 45:
+                        marketsMain = markets45;
+                        totalRows = totalRows45;
+                        currentRow = currentRow45;
+                        break;
+                    case 46:
+                        marketsMain = markets46;
+                        totalRows = totalRows46;
+                        currentRow = currentRow46;
+                        break;
+                    default:
+                        Console.WriteLine($"UserID {user.UserID} zone not found");
+                        break;
                 }
                 if (ReserveLogsForUserInRow(user, user.LogNum, currentRow))
                 {
                     currentRow += 1;
-                    if (user.zone == 43) currentRow43 = currentRow;
-                    else if (user.zone == 45) currentRow45 = currentRow;
-                    else if (user.zone == 46) currentRow46 = currentRow;
+                    SetRow(user.zone);
                 }
                 else
                 {
@@ -490,9 +460,7 @@ public class IndexModel : PageModel
                         if (ReserveLogsForUserInRow(user, user.LogNum, i))
                         {
                             currentRow += 1;
-                            if (user.zone == 43) currentRow43 = currentRow;
-                            else if (user.zone == 45) currentRow45 = currentRow;
-                            else if (user.zone == 46) currentRow46 = currentRow;
+                            SetRow(user.zone);
                             break;
                         }
                     }
@@ -500,10 +468,14 @@ public class IndexModel : PageModel
                 if (currentRow > totalRows)
                 {
                     currentRow = 1;
-                    if (user.zone == 43) currentRow43 = currentRow;
-                    else if (user.zone == 45) currentRow45 = currentRow;
-                    else if (user.zone == 46) currentRow46 = currentRow;
+                    SetRow(user.zone);
                 }
+            }
+            void SetRow(int zone)
+            {
+                if (zone == 43) currentRow43 = currentRow;
+                else if (zone == 45) currentRow45 = currentRow;
+                else if (zone == 46) currentRow46 = currentRow;
             }
         }
 
@@ -516,7 +488,7 @@ public class IndexModel : PageModel
             }
 
             var availableLogs = marketsMain
-                .Where(m => m.IsReserve == 1 && m.Row == row)
+                .Where(m => m.IsReserve == 0 && m.Row == row)
                 .Select(m => m.LogeIndex)
                 .ToList();
             if (availableLogs.Count>0)
@@ -524,12 +496,12 @@ public class IndexModel : PageModel
                 var selectedLogs = GetFirstConsecutiveLogs(availableLogs, logCount);
                 if (selectedLogs != null)
                 {
-                    var names = marketsMain.Where(m => selectedLogs.Contains(m.LogeIndex)).Select(m => m.LogeName).ToList();
+                    var names = marketsMain.Where(m => selectedLogs.Contains(m.LogeIndex) && m.Row==row).Select(m => m.LogeName).ToList();
                     user.UserLogIDs.AddRange(selectedLogs);
                     user.UserLogNames.AddRange(names);
-                    MarkLogsAsReserved(selectedLogs, user.zone);
+                    MarkLogsAsReserved(selectedLogs, user.zone ,row);
                     user.UserStatus = 1;
-                    Console.WriteLine($"UserID {user.UserID} RS {logCount} log SUC...: {string.Join(", ", selectedLogs)}");
+                    Console.WriteLine($"UserID {user.UserID} RS {logCount} log SUC...: {string.Join(", ", names)}");
                     return true;
                 }
                 Console.WriteLine($"UserID {user.UserID} Can't RS on Row {row}");
@@ -570,64 +542,62 @@ public class IndexModel : PageModel
             return logIDs.Count(logID => marketsMain.First(m => m.LogeIndex == logID).IsCorner);
         }
 
-        private void MarkLogsAsReserved(List<int> logIDs , int zone)
+        private void MarkLogsAsReserved(List<int> logIDs , int zone , int row)
         {
             int zoneID = zone;
             foreach (var logID in logIDs)
             {
-                UpdateLogs(zoneID, logID);
+                UpdateLogs(zoneID, logID , row);
             }
         }
 
-        public void UpdateLogs(int zone , int id)
+        public void UpdateLogs(int zone , int id , int row)
         {
-            if (zone == 43) {
-                marketsMain.First(m => m.LogeIndex == id).IsReserve = 0;
-                markets43.First(m => m.LogeIndex == id).IsReserve = 0;
-            }
-            else if (zone == 45) 
-            { 
-                marketsMain.First(m => m.LogeIndex == id).IsReserve = 0;
-                markets45.First(m => m.LogeIndex == id).IsReserve = 0;
-            }  
-            else if (zone == 46)
+            switch (zone)
             {
-                marketsMain.First(m => m.LogeIndex == id).IsReserve = 0;
-                markets46.First(m => m.LogeIndex == id).IsReserve = 0;
+                case 43:
+                    marketsMain.First(m => m.LogeIndex == id && m.Row == row).IsReserve = 1;
+                    markets43.First(m => m.LogeIndex == id && m.Row == row).IsReserve = 1;
+                    break;
+                case 45:
+                    marketsMain.First(m => m.LogeIndex == id && m.Row == row).IsReserve = 1;
+                    markets45.First(m => m.LogeIndex == id && m.Row == row).IsReserve = 1;
+                    break;
+                case 46:
+                    marketsMain.First(m => m.LogeIndex == id && m.Row == row).IsReserve = 1;
+                    markets46.First(m => m.LogeIndex == id && m.Row == row).IsReserve = 1;
+                    break;
+                default:
+                    Console.WriteLine("Error on update loges to users");
+                    break;
             }
         }
 
-        public void UpdateLogsToDB()
+        public void UpdateDB()
         {
-            //var combinedMarkets = markets43.Where(m => m.IsReserve == 0)
-            //    .Concat(markets45.Where(m => m.IsReserve == 0))
-            //    .Concat(markets46.Where(m => m.IsReserve == 0))
-            //    .ToList();
-            //foreach (var market in combinedMarkets)
-            //{
-            //    Console.WriteLine($"LogID: {market.LogeIndex}, LogeName: {market.LogeName}, IsReserve: {market.IsReserve}");
-            //}
             //using (var db = new SaveoneKoratMarketContext())
             //{
-            //    // ดึง LogeId จาก combinedMarkets
-            //    var logeIdsToUpdate = combinedMarkets.Select(m => m.LogeID).ToList();
+            //    var allMarkets = markets43.Concat(markets45).Concat(markets46).ToList();
 
-            //    // ค้นหา LogeTempOffline ที่มี LogeId ตรงกับ combinedMarkets และ Status == 0
-            //    var logeTempOfflinesToUpdate = db.LogeTempOfflines.Where(lto => logeIdsToUpdate.Contains(lto.LogeId) && lto.Status == 0).ToList();
-
-            //    // อัปเดตค่า Status เป็น 1
-            //    foreach (var logeTempOffline in logeTempOfflinesToUpdate)
+            //    foreach (var market in allMarkets)
             //    {
-            //        logeTempOffline.Status = 1;
+            //        var targetLoge = db.LogeTempOfflines.FirstOrDefault(x => x.LogeId == market.LogeID);
+            //        if (targetLoge != null)
+            //        {
+            //            targetLoge.Status = market.IsReserve;
+            //        }
             //    }
-
-            //    // บันทึกการเปลี่ยนแปลงลงในฐานข้อมูล
             //    db.SaveChanges();
             //}
-            //var unreservedLogs = marketsMain.Where(m => m.IsReserve == 1).Select(m => m.LogID).ToList();
-            //Console.WriteLine($"Log No RS : {string.Join(", ", unreservedLogs)}");
         }
-
+        public void ShowAllLogsDontRS()
+        {
+            //var allMarkets = markets43.Concat(markets45).Concat(markets46).ToList();
+            //foreach (var market in allMarkets)
+            //{
+            //    Console.WriteLine($"LogID: {market.LogeID}, LogName: {market.LogeName}, IsReserved: {market.IsReserve}");
+            //}
+        }
         public void ShowAllUsers(List<UserModel> users)
         {
             foreach (var user in users)
