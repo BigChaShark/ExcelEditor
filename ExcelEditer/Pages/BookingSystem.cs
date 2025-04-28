@@ -1,0 +1,248 @@
+﻿using ExcelEditor.Models;
+using static IndexModel;
+using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Http;
+using System.IO;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using OfficeOpenXml;
+using Microsoft.EntityFrameworkCore;
+using ExcelEditor;
+using ExcelEditor.Models;
+using static IndexModel;
+using System.Text.RegularExpressions;
+using ExcelEditor.Pages;
+
+namespace ExcelEditor.Pages
+{
+    public class BookingSystem
+    {
+        private List<LogeModel> logeMain = new List<LogeModel>();
+        private int totalRows;
+        private Dictionary<int, int> currentRows = new Dictionary<int, int>
+        {
+            { 43, 1 },
+            { 45, 1 },
+            { 46, 1 },
+            { 49, 1 },
+            { 50, 1 }
+        };
+        public BookingSystem()
+        {
+            DateTime currentDate = DateTime.Now;
+            DateTime nextDate = currentDate.AddDays(2);
+            int openCase = 0;
+            switch (nextDate.DayOfWeek.ToString().ToLower())
+            {
+                case "monday": openCase = 1; break;
+                case "tuesday": openCase = 2; break;
+                case "wednesday": openCase = 3; break;
+                case "thursday": openCase = 4; break;
+                case "friday": openCase = 5; break;
+                case "saturday": openCase = 6; break;
+                case "sunday": openCase = 7; break;
+                default: break;
+            }
+            var db = new SaveoneKoratMarketContext();
+            var loge = db.LogeTempOfflines
+                .Include(x => x.Loge)
+                .ThenInclude(l => l.LogeGroup)
+                .Where(x => (x.Loge.LogeGroup.SubZoneId == 43 || 
+                             x.Loge.LogeGroup.SubZoneId == 45 || 
+                             x.Loge.LogeGroup.SubZoneId == 46 || 
+                             x.Loge.LogeGroup.SubZoneId == 49 || 
+                             x.Loge.LogeGroup.SubZoneId == 50) && (x.OpenDateInt == DateOnly.FromDateTime(nextDate)))
+                .OrderBy(x => x.Loge.LogeGroup.SubZoneId).ThenBy(x => x.Loge.LogeGroup.GroupSeqNo).ThenBy(x => x.LogeIndex)
+                .ToList();
+            if (loge != null)
+            {
+                for (int i = 0; i < loge.Count; i++)
+                {
+                    var seqNum = loge[i].Loge.LogeGroup.GroupSeqNo;
+                    var name = loge[i].LogeName;
+                    var zone = loge[i].Loge.LogeGroup.SubZoneId;
+                    var isReserve = loge[i].Status;
+                    var p = (i > 0) ? loge[i - 1].Loge.LogeGroup.GroupSeqNo : -99;
+                    var n = (i < loge.Count - 1) ? loge[i + 1].Loge.LogeGroup.GroupSeqNo : -99;
+                    bool isCorner = p == n ? false : true;
+                    logeMain.Add(new LogeModel
+                    {
+                        Row = seqNum,
+                        IsCorner = isCorner,
+                        LogeName = name,
+                        LogeIndex = loge.Where(x => x.Loge.LogeGroup.SubZoneId == zone).Max(x => x.Loge.LogeGroup.GroupSeqNo),
+                        IsReserve = isReserve,
+                        LogeID = loge[i].LogeId,
+                        LogeSeqNum = seqNum,
+                        LogeZone = zone ?? 0
+                    });
+                }
+                int index = 1;
+                foreach (var item in logeMain)
+                {
+                    Console.WriteLine($"{index} : Row {item.Row}:{item.LogeName} {(item.IsCorner ? " (Corner)" : "")} IsZone : {item.LogeZone} LogID : {item.LogeID}");
+                    index++;
+                }
+                var loge49 = logeMain.Where(x => x.LogeZone == 49).ToList();
+                int index2 = 1;
+                foreach (var item in loge49)
+                {
+                    Console.WriteLine($"CH {index2} : Row {item.Row}:{item.LogeName} {(item.IsCorner ? " (Corner)" : "")} IsZone : {item.LogeZone} LogID : {item.LogeID}");
+                    index2++;
+                }
+            }
+        }
+        public void ReserveLogs(List<UserModel> users)
+        {
+            Random random = new Random();
+            var shuffledUsers = users.OrderBy(x => random.Next()).ToList();
+            int currentRow = 1;
+            foreach (var user in shuffledUsers)
+            {
+                if (user.UserStatus == 1) continue;
+                if (currentRows.ContainsKey(user.zone))
+                {
+                    currentRow = currentRows[user.zone];
+                    totalRows = logeMain.Where(x => x.LogeZone == user.zone).Max(m => m.LogeIndex);
+                }
+                else
+                {
+                    Console.WriteLine($"Zone not found at User ID : {user.UserID}");
+                }
+                if (ReserveLogsForUserInRow(user, user.LogNum, currentRow, user.zone))
+                {
+                    currentRow += 1;
+                    SetRow(user.zone);
+                }
+                else
+                {
+                    for (int i = 1; i <= totalRows; i++)
+                    {
+                        if (ReserveLogsForUserInRow(user, user.LogNum, i, user.zone))
+                        {
+                            currentRow += 1;
+                            SetRow(user.zone);
+                            break;
+                        }
+                    }
+                }
+                if (currentRow > totalRows)
+                {
+                    currentRow = 1;
+                    SetRow(user.zone);
+                }
+            }
+            void SetRow(int zone)
+            {
+                if (currentRows.ContainsKey(zone))
+                {
+                    currentRows[zone] = currentRow;
+                }
+            }
+        }
+
+        private bool ReserveLogsForUserInRow(UserModel user, int logCount, int row, int zone)
+        {
+            if (logCount < 1 || logCount > 3)
+            {
+                Console.WriteLine($"UserID {user.UserID} Must <= 3 log");
+                return false;
+            }
+            var availableLogs = logeMain
+                .Where(m => m.IsReserve == 0 && m.Row == row && m.LogeZone == zone)
+                .Select(m => m.LogeID)
+                .ToList();
+            if (availableLogs.Count > 0)
+            {
+                var selectedLogs = GetFirstConsecutiveLogs(availableLogs, logCount, user.zone);
+                if (selectedLogs != null)
+                {
+                    var names = logeMain.Where(m => selectedLogs.Contains(m.LogeID) && m.Row == row).Select(m => m.LogeName).ToList();
+                    user.UserLogIDs.AddRange(selectedLogs);
+                    user.UserLogNames.AddRange(names);
+                    MarkLogeAsReserved(selectedLogs);
+                    user.UserStatus = 1;
+                    Console.WriteLine($"UserID {user.UserID} RS {logCount} log SUC...: {string.Join(", ", names)}");
+                    return true;
+                }
+                Console.WriteLine($"UserID {user.UserID} Can't RS on Row {row}");
+                return false;
+            }
+            else
+            {
+                return false;
+            }
+
+        }
+        private List<int> GetFirstConsecutiveLogs(List<int> availableLogs, int logCount, int zone)
+        {
+            for (int i = 0; i <= availableLogs.Count - logCount; i++)
+            {
+                var subset = availableLogs.Skip(i).Take(logCount).ToList();
+                if (subset.Count == logCount && IsConsecutive(subset) && CountCornerLogs(subset) <= 1)
+                {
+                    return subset;
+                }
+            }
+            return null;
+        }
+
+        private bool IsConsecutive(List<int> logIDs)
+        {
+            logIDs.Sort();
+            for (int i = 1; i < logIDs.Count; i++)
+            {
+                if (logIDs[i] != logIDs[i - 1] + 1) return false;
+            }
+            return true;
+        }
+
+        private int CountCornerLogs(List<int> logIDs)
+        {
+            return logIDs.Count(logID => logeMain.First(m => m.LogeID == logID).IsCorner);
+        }
+
+        private void MarkLogeAsReserved(List<int> logIDs)
+        {
+            foreach (var logID in logIDs)
+            {
+                logeMain.First(m => m.LogeID == logID).IsReserve = 1;
+            }
+        }
+        public void UpdateDB()
+        {
+            //using (var db = new SaveoneKoratMarketContext())
+            //{
+            //    var allMarkets = markets43.Concat(markets45).Concat(markets46).ToList();
+
+            //    foreach (var loge in logeMain)
+            //    {
+            //        var targetLoge = db.LogeTempOfflines.FirstOrDefault(x => x.LogeId == loge.LogeID);
+            //        if (targetLoge != null)
+            //        {
+            //            targetLoge.Status = loge.IsReserve;
+            //        }
+            //    }
+            //    db.SaveChanges();
+            //}
+        }
+        public void ShowAllLogsDontRS()
+        {
+            //var allMarkets = markets43.Concat(markets45).Concat(markets46).ToList();
+            //foreach (var market in allMarkets)
+            //{
+            //    Console.WriteLine($"LogID: {market.LogeID}, LogName: {market.LogeName}, IsReserved: {market.IsReserve}");
+            //}
+        }
+        public void ShowAllUsers(List<UserModel> users)
+        {
+            foreach (var user in users)
+            {
+                Console.WriteLine($"UserID: {user.UserID}, Logs Reserved: {string.Join(", ", user.UserLogNames)}");
+            }
+        }
+    }
+}
