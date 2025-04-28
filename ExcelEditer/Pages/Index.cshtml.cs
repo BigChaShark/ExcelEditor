@@ -11,6 +11,7 @@ using ExcelEditor;
 using ExcelEditor.Models;
 using static IndexModel;
 using System.Text.RegularExpressions;
+using ExcelEditor.Pages;
 
 public class IndexModel : PageModel
 {
@@ -170,23 +171,58 @@ public class IndexModel : PageModel
         ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
         using (var package = new ExcelPackage(new FileInfo(filePath)))
         {
-            var worksheet = package.Workbook.Worksheets[1];
-            var rowCount = worksheet.Dimension.Rows;
+            var allWorksheets = package.Workbook.Worksheets.ToList();
+            var selectedWorksheets = allWorksheets.Skip(1).Take(2);
 
-            for (int row = 2; row <= rowCount; row++) // เริ่มจากแถวที่ 2  
+            foreach (var sheet in selectedWorksheets)
             {
-                var user = new UserModel();
-                //if (int.TryParse(worksheet.Cells[row, 3].Text, out int userId))
-                //    user.UserID = userId;
-                user.UserID = worksheet.Cells[row, 3].Text;
-                if (int.TryParse(worksheet.Cells[row, 6].Text, out int logNum))
-                    user.LogNum = logNum;
-                if (int.TryParse(worksheet.Cells[row, 5].Text, out int zone))
-                    user.zone = zone;
-                //if (int.TryParse(worksheet.Cells[row, 3].Text, out int zone))
-                //    user.zone = zone;
-                users.Add(user);
+                int rowCount = sheet.Dimension.Rows;
+
+                for (int row = 2; row <= rowCount; row++)
+                {
+                    if (string.IsNullOrEmpty(sheet.Cells[row, 3].Text))
+                        continue;
+                    var user = new UserModel();
+                    //if (int.TryParse(worksheet.Cells[row, 3].Text, out int userId))
+                    //    user.UserID = userId;
+                    //int zoneID = GetLogzone(sheet.Cells[row, 4].Text);
+                    int zoneID = GetLogZone.GetLogzone(sheet.Cells[row, 4].Text);
+                    user.UserID = sheet.Cells[row, 3].Text + zoneID;
+                    user.zone = zoneID;
+                    if (int.TryParse(sheet.Cells[row, 5].Text, out int logNum))
+                        user.LogNum = logNum;
+                    //if (int.TryParse(sZone, out int zone))
+                    //    user.zone = zone;
+                    //if (int.TryParse(worksheet.Cells[row, 3].Text, out int zone))
+                    //    user.zone = zone;
+                    users.Add(user);
+                }
             }
+            //int GetLogzone(string name) =>
+            //        name.Contains("GA-GJ") ? 43 :
+            //        name.Contains("GL-GT") ? 45 : 
+            //        name.Contains("GW-GZ") ? 46 : 
+            //        name.Contains("R01B-R01S") ? 49 : 
+            //        name.Contains("R01A") ? 50 : 0;
+            
+
+            //var worksheet = package.Workbook.Worksheets[1];
+            //var rowCount = worksheet.Dimension.Rows;
+
+            //for (int row = 2; row <= rowCount; row++) // เริ่มจากแถวที่ 2  
+            //{
+            //    var user = new UserModel();
+            //    //if (int.TryParse(worksheet.Cells[row, 3].Text, out int userId))
+            //    //    user.UserID = userId;
+            //    user.UserID = worksheet.Cells[row, 3].Text;
+            //    if (int.TryParse(worksheet.Cells[row, 6].Text, out int logNum))
+            //        user.LogNum = logNum;
+            //    if (int.TryParse(worksheet.Cells[row, 5].Text, out int zone))
+            //        user.zone = zone;
+            //    //if (int.TryParse(worksheet.Cells[row, 3].Text, out int zone))
+            //    //    user.zone = zone;
+            //    users.Add(user);
+            //}
         }
 
         return users;
@@ -230,21 +266,37 @@ public class IndexModel : PageModel
 
         using (var package = new ExcelPackage(new FileInfo(filePath)))
         {
-            var worksheet = package.Workbook.Worksheets[1];
-            var rowCount = worksheet.Dimension.Rows;
+            var allWorksheets = package.Workbook.Worksheets.ToList();
 
-            for (int row = 2; row <= rowCount; row++)
+            foreach (var sheet in allWorksheets)
             {
-                string id = worksheet.Cells[row, 3].Text;
-
-                var matched = x.FirstOrDefault(x => x.UserID == id);
-
-                if (matched != null && matched.UserLogIDs.Any())
+                var rowCount = sheet.Dimension.Rows;
+                for (int row = 2; row <= rowCount; row++)
                 {
-                    string userLogIDsString = string.Join(",", matched.UserLogNames);
-                    worksheet.Cells[row, 9].Value = userLogIDsString; // เติมใน column 8
+                    int zoneID = GetLogZone.GetLogzone(sheet.Cells[row, 4].Text);
+                    string id = sheet.Cells[row, 3].Text +zoneID;
+
+                    var matched = x.FirstOrDefault(x => x.UserID == id);
+
+                    if (matched != null && matched.UserLogIDs.Any())
+                    {
+                        string userLogIDsString = string.Join(",", matched.UserLogNames);
+                        sheet.Cells[row, 8].Value = userLogIDsString; // เติมใน column 8
+                    }
                 }
             }
+            //    for (int row = 2; row <= rowCount; row++)
+            //{
+            //    string id = worksheet.Cells[row, 3].Text;
+
+            //    var matched = x.FirstOrDefault(x => x.UserID == id);
+
+            //    if (matched != null && matched.UserLogIDs.Any())
+            //    {
+            //        string userLogIDsString = string.Join(",", matched.UserLogNames);
+            //        worksheet.Cells[row, 9].Value = userLogIDsString; // เติมใน column 8
+            //    }
+            //}
 
             package.Save(); // เซฟไฟล์
         }
@@ -289,7 +341,8 @@ public class IndexModel : PageModel
                     .Where(x => x.Loge.LogeGroup.SubZoneId == 45 && (x.OpenDateInt == DateOnly.FromDateTime(nextDate)))
                     .OrderBy(x => x.Loge.LogeGroup.GroupSeqNo).ThenBy(x => x.LogeIndex)
                     .ToList();
-            var loge46 = db.LogeTempOfflines.Include(x => x.Loge)
+            var loge46 = db.LogeTempOfflines
+                    .Include(x => x.Loge)
                     .ThenInclude(l => l.LogeGroup)
                     .Where(x => (x.Loge.LogeGroup.SubZoneId == 46) && (x.OpenDateInt == DateOnly.FromDateTime(nextDate)) )
                     .OrderBy(x => x.Loge.LogeGroup.GroupSeqNo).ThenBy(x => x.LogeIndex)
@@ -489,14 +542,14 @@ public class IndexModel : PageModel
 
             var availableLogs = marketsMain
                 .Where(m => m.IsReserve == 0 && m.Row == row)
-                .Select(m => m.LogeIndex)
+                .Select(m => m.LogeID)
                 .ToList();
             if (availableLogs.Count>0)
             {
-                var selectedLogs = GetFirstConsecutiveLogs(availableLogs, logCount);
+                var selectedLogs = GetFirstConsecutiveLogs(availableLogs, logCount,user.zone);
                 if (selectedLogs != null)
                 {
-                    var names = marketsMain.Where(m => selectedLogs.Contains(m.LogeIndex) && m.Row==row).Select(m => m.LogeName).ToList();
+                    var names = marketsMain.Where(m => selectedLogs.Contains(m.LogeID) && m.Row==row).Select(m => m.LogeName).ToList();
                     user.UserLogIDs.AddRange(selectedLogs);
                     user.UserLogNames.AddRange(names);
                     MarkLogsAsReserved(selectedLogs, user.zone ,row);
@@ -514,12 +567,12 @@ public class IndexModel : PageModel
 
         }
 
-        private List<int> GetFirstConsecutiveLogs(List<int> availableLogs, int logCount)
+        private List<int> GetFirstConsecutiveLogs(List<int> availableLogs, int logCount,int zone)
         {
             for (int i = 0; i <= availableLogs.Count - logCount; i++)
             {
                 var subset = availableLogs.Skip(i).Take(logCount).ToList();
-                if (subset.Count==logCount && IsConsecutive(subset) && CountCornerLogs(subset) <= 1)
+                if (subset.Count==logCount && IsConsecutive(subset,zone) && CountCornerLogs(subset) <= 1)
                 {
                     return subset;
                 }
@@ -527,19 +580,21 @@ public class IndexModel : PageModel
             return null;
         }
 
-        private bool IsConsecutive(List<int> logIDs)
+        private bool IsConsecutive(List<int> logIDs , int zone)
         {
             logIDs.Sort();
+            //int nowZone = zone==46 ? 2 : 1;
+            int nowZone = 1;
             for (int i = 1; i < logIDs.Count; i++)
             {
-                if (logIDs[i] != logIDs[i - 1] + 1) return false;
+                if (logIDs[i] != logIDs[i - 1] + nowZone) return false;
             }
             return true;
         }
 
         private int CountCornerLogs(List<int> logIDs)
         {
-            return logIDs.Count(logID => marketsMain.First(m => m.LogeIndex == logID).IsCorner);
+            return logIDs.Count(logID => marketsMain.First(m => m.LogeID == logID).IsCorner);
         }
 
         private void MarkLogsAsReserved(List<int> logIDs , int zone , int row)
@@ -556,16 +611,16 @@ public class IndexModel : PageModel
             switch (zone)
             {
                 case 43:
-                    marketsMain.First(m => m.LogeIndex == id && m.Row == row).IsReserve = 1;
-                    markets43.First(m => m.LogeIndex == id && m.Row == row).IsReserve = 1;
+                    marketsMain.First(m => m.LogeID == id && m.Row == row).IsReserve = 1;
+                    markets43.First(m => m.LogeID == id && m.Row == row).IsReserve = 1;
                     break;
                 case 45:
-                    marketsMain.First(m => m.LogeIndex == id && m.Row == row).IsReserve = 1;
-                    markets45.First(m => m.LogeIndex == id && m.Row == row).IsReserve = 1;
+                    marketsMain.First(m => m.LogeID == id && m.Row == row).IsReserve = 1;
+                    markets45.First(m => m.LogeID == id && m.Row == row).IsReserve = 1;
                     break;
                 case 46:
-                    marketsMain.First(m => m.LogeIndex == id && m.Row == row).IsReserve = 1;
-                    markets46.First(m => m.LogeIndex == id && m.Row == row).IsReserve = 1;
+                    marketsMain.First(m => m.LogeID == id && m.Row == row).IsReserve = 1;
+                    markets46.First(m => m.LogeID == id && m.Row == row).IsReserve = 1;
                     break;
                 default:
                     Console.WriteLine("Error on update loges to users");
@@ -602,7 +657,7 @@ public class IndexModel : PageModel
         {
             foreach (var user in users)
             {
-                Console.WriteLine($"UserID: {user.UserID}, Logs Reserved: {string.Join(", ", user.UserLogIDs)}");
+                Console.WriteLine($"UserID: {user.UserID}, Logs Reserved: {string.Join(", ", user.UserLogNames)}");
             }
         }
     }
