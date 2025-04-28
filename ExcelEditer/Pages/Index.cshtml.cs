@@ -172,7 +172,7 @@ public class IndexModel : PageModel
         using (var package = new ExcelPackage(new FileInfo(filePath)))
         {
             var allWorksheets = package.Workbook.Worksheets.ToList();
-            var selectedWorksheets = allWorksheets.Skip(1).Take(2);
+            var selectedWorksheets = allWorksheets.Skip(1).Take(1);
 
             foreach (var sheet in selectedWorksheets)
             {
@@ -332,8 +332,8 @@ public class IndexModel : PageModel
             var loge43 = db.LogeTempOfflines
                 .Include(x => x.Loge)
                 .ThenInclude(l => l.LogeGroup)
-                .Where(x => x.Loge.LogeGroup.SubZoneId == 43 && (x.OpenDateInt == DateOnly.FromDateTime(nextDate)))
-                .OrderBy(x => x.Loge.LogeGroup.GroupSeqNo).ThenBy(x => x.LogeIndex)
+                .Where(x => x.Loge.LogeGroup.SubZoneId == 43 && (x.OpenDateInt == DateOnly.FromDateTime(nextDate)) || x.Loge.LogeGroup.SubZoneId == 45 && (x.OpenDateInt == DateOnly.FromDateTime(nextDate)))
+                .OrderBy(x => x.Loge.LogeGroup.SubZoneId).ThenBy(x => x.Loge.LogeGroup.GroupSeqNo).ThenBy(x => x.LogeIndex)
                 .ToList();
             var loge45 = db.LogeTempOfflines
                     .Include(x => x.Loge)
@@ -349,37 +349,58 @@ public class IndexModel : PageModel
                     .ToList();
             if (loge43 != null) 
             {
-                var groupIndexes = loge43.Select((item, index) => new { item, index }).GroupBy(x => x.item.Loge.LogeGroup.GroupSeqNo).Select(g => new
-                {
-                    GroupSeqNo = g.Key,
-                    FirstIndex = g.First().index,
-                    LastIndex = g.Last().index
-                }).ToList();
                 int index = 0;
-                foreach (var item in loge43)
+                for (int i = 0; i < loge43.Count; i++)
                 {
-                    var seqNum = item.Loge.LogeGroup.GroupSeqNo;
-                    var name = item.LogeName;
-                    var zone = item.Loge.LogeGroup.SubZoneId;
-                    var isReserve = item.Status;
-                    bool isCorner = groupIndexes.Any(g => g.FirstIndex == index || g.LastIndex == index);
-                    markets43.Add(new Market
+                    var seqNum = loge43[i].Loge.LogeGroup.GroupSeqNo;
+                    var name = loge43[i].LogeName;
+                    var zone = loge43[i].Loge.LogeGroup.SubZoneId;
+                    var isReserve = loge43[i].Status;
+                    var p = (i > 0) ? loge43[i - 1].Loge.LogeGroup.GroupSeqNo : -99;
+                    var n = (i < loge43.Count - 1) ? loge43[i + 1].Loge.LogeGroup.GroupSeqNo : -99;
+                    bool isCorner = p==n?false:true;
+                    marketsMain.Add(new Market
                     {
                         Row = seqNum,
                         IsCorner = isCorner,
                         LogeName = name,
-                        LogeIndex = ExtractNumber(name),
+                        LogeIndex = loge43.Where(x => x.Loge.LogeGroup.SubZoneId == zone).Max(x => x.Loge.LogeGroup.GroupSeqNo),
                         IsReserve = isReserve,
-                        LogeID = item.LogeId,
+                        LogeID = loge43[i].LogeId,
                         LogeSeqNum = seqNum,
+                        LogeZone = (int)zone
                     });
-                    index += 1;
                 }
+                //foreach (var item in loge43.Select((value, index) => new { value, index }))
+                //{
+                //    var seqNum = item.value.Loge.LogeGroup.GroupSeqNo;
+                //    var name = item.value.LogeName;
+                //    var zone = item.value.Loge.LogeGroup.SubZoneId;
+                //    var isReserve = item.value.Status;
+                    
+                //    bool isCorner  = false;
+                    
+                //        markets43.Add(new Market
+                //    {
+                //        Row = seqNum,
+                //        IsCorner = isCorner,
+                //        LogeName = name,
+                //        LogeIndex = loge43.Where(x => x.Loge.LogeGroup.SubZoneId == zone).Max(x => x.Loge.LogeGroup.GroupSeqNo),
+                //        IsReserve = isReserve,
+                //        LogeID = item.value.LogeId,
+                //        LogeSeqNum = seqNum,
+                //        LogeZone = (int)zone
+                //    });
+                //    index += 1;
+                //}
                 var maxGroupSeqNo = loge43.Select(x => x.Loge.LogeGroup.GroupSeqNo).Max();
-                totalRows43 = maxGroupSeqNo;
+                totalRows43 = loge43.Where(x => x.Loge.LogeGroup.SubZoneId == 43).Max(x => x.Loge.LogeGroup.GroupSeqNo);
+                totalRows45 = loge43.Where(x => x.Loge.LogeGroup.SubZoneId == 45).Max(x => x.Loge.LogeGroup.GroupSeqNo);
+                Console.WriteLine($"Row 43 {totalRows43} Row 45 {totalRows45}");
+                Console.WriteLine($"Row Max old  {maxGroupSeqNo}");
                 foreach (var item in markets43)
                 {
-                    Console.WriteLine($"Row {item.Row}: {item.LogeName} {(item.IsCorner ? " (Corner)" : "")} IsSeq : {item.LogeSeqNum} Log Index : {item.LogeIndex}");
+                    Console.WriteLine($"Row {item.Row}: {item.LogeName} {(item.IsCorner ? " (Corner)" : "")} IsZone : {item.LogeZone} Log Index : {item.LogeIndex}");
                 }
             }
             if (loge45 != null)
@@ -483,12 +504,10 @@ public class IndexModel : PageModel
                 switch (user.zone)
                 {
                     case 43:
-                        marketsMain = markets43;
                         totalRows = totalRows43;
                         currentRow = currentRow43;
                         break;
                     case 45:
-                        marketsMain = markets45;
                         totalRows = totalRows45;
                         currentRow = currentRow45;
                         break;
@@ -501,7 +520,7 @@ public class IndexModel : PageModel
                         Console.WriteLine($"UserID {user.UserID} zone not found");
                         break;
                 }
-                if (ReserveLogsForUserInRow(user, user.LogNum, currentRow))
+                if (ReserveLogsForUserInRow(user, user.LogNum, currentRow , user.zone))
                 {
                     currentRow += 1;
                     SetRow(user.zone);
@@ -510,7 +529,7 @@ public class IndexModel : PageModel
                 {
                     for (int i = 1; i <= totalRows; i++)
                     {
-                        if (ReserveLogsForUserInRow(user, user.LogNum, i))
+                        if (ReserveLogsForUserInRow(user, user.LogNum, i, user.zone))
                         {
                             currentRow += 1;
                             SetRow(user.zone);
@@ -532,7 +551,7 @@ public class IndexModel : PageModel
             }
         }
 
-        private bool ReserveLogsForUserInRow(UserModel user, int logCount, int row)
+        private bool ReserveLogsForUserInRow(UserModel user, int logCount, int row ,int zone)
         {
             if (logCount < 1 || logCount > 3)
             {
@@ -541,7 +560,7 @@ public class IndexModel : PageModel
             }
 
             var availableLogs = marketsMain
-                .Where(m => m.IsReserve == 0 && m.Row == row)
+                .Where(m => m.IsReserve == 0 && m.Row == row && m.LogeZone == zone)
                 .Select(m => m.LogeID)
                 .ToList();
             if (availableLogs.Count>0)
@@ -611,12 +630,12 @@ public class IndexModel : PageModel
             switch (zone)
             {
                 case 43:
-                    marketsMain.First(m => m.LogeID == id && m.Row == row).IsReserve = 1;
-                    markets43.First(m => m.LogeID == id && m.Row == row).IsReserve = 1;
+                    marketsMain.First(m => m.LogeID == id).IsReserve = 1;
+                    //markets43.First(m => m.LogeID == id && m.Row == row).IsReserve = 1;
                     break;
                 case 45:
-                    marketsMain.First(m => m.LogeID == id && m.Row == row).IsReserve = 1;
-                    markets45.First(m => m.LogeID == id && m.Row == row).IsReserve = 1;
+                    marketsMain.First(m => m.LogeID == id).IsReserve = 1;
+                    //markets45.First(m => m.LogeID == id && m.Row == row).IsReserve = 1;
                     break;
                 case 46:
                     marketsMain.First(m => m.LogeID == id && m.Row == row).IsReserve = 1;
