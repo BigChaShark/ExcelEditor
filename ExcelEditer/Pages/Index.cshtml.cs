@@ -30,14 +30,16 @@ public class IndexModel : PageModel
 
     public class LogeModel
     {
-        public int LogeIndex { get; set; }
+        public int MaxRow { get; set; }
         public int LogeID { get; set; }
+        public int LogeIndex { get; set; }
         public string LogeName { get; set; }
         public int LogeZone { get; set; }
         public int LogeSeqNum { get; set; }
         public int IsReserve { get; set; } // 1 = not reserve , 0 = reserve
         public bool IsCorner { get; set; } = false;
         public int Row { get; set; }
+        public int Column { get; set; }
     }
 
     public void OnGet()
@@ -165,9 +167,9 @@ public class IndexModel : PageModel
         using (var package = new ExcelPackage(new FileInfo(filePath)))
         {
             var allWorksheets = package.Workbook.Worksheets.ToList();
-            var selectedWorksheets = allWorksheets.Skip(1);
+            //var selectedWorksheets = allWorksheets.Skip(1);
 
-            foreach (var sheet in selectedWorksheets)
+            foreach (var sheet in allWorksheets)
             {
                 int rowCount = sheet.Dimension.Rows;
 
