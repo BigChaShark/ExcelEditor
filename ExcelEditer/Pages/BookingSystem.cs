@@ -81,6 +81,7 @@ namespace ExcelEditor.Pages
                         LogeZone = zone ?? 0,
                         LogeIndex = loge[i].LogeIndex,
                         Column = splitInt(name),
+                        OpenDateInt = loge[i].OpenDateInt,
                     });
                 }
                 int splitInt(string name)
@@ -111,7 +112,7 @@ namespace ExcelEditor.Pages
         {
             Random random = new Random();
             //var shuffledUsers = users.OrderByDescending(m => m.LogNum).ThenBy(x => random.Next()).ToList();
-            var shuffledUsers = users.OrderBy(x => random.Next()).ToList();
+            var shuffledUsers = users.OrderBy(m => m.SheetIndex).ThenBy(x => random.Next()).ToList();
             int currentRow = 1;
             foreach (var user in shuffledUsers)
             {
@@ -165,13 +166,13 @@ namespace ExcelEditor.Pages
                 //    SetRow(user.zone);
                 //}
             }
-            void SetRow(int zone)
-            {
-                if (currentRows.ContainsKey(zone))
-                {
-                    currentRows[zone] = currentRow;
-                }
-            }
+            //void SetRow(int zone)
+            //{
+            //    if (currentRows.ContainsKey(zone))
+            //    {
+            //        currentRows[zone] = currentRow;
+            //    }
+            //}
         }
 
         private bool ReserveLogsForUserInRow(UserModel user, int logCount, int row, int zone)
@@ -248,7 +249,7 @@ namespace ExcelEditor.Pages
             //{
             //    foreach (var loge in logeMain)
             //    {
-            //        var targetLoge = db.LogeTempOfflines.FirstOrDefault(x => x.LogeId == loge.LogeID);
+            //        var targetLoge = db.LogeTempOfflines.FirstOrDefault(x => x.LogeId == loge.LogeID && x.OpenDateInt == loge.OpenDateInt);
             //        if (targetLoge != null)
             //        {
             //            targetLoge.Status = loge.IsReserve;
@@ -257,7 +258,7 @@ namespace ExcelEditor.Pages
             //    db.SaveChanges();
             //}
         }
-        public void ShowAllLogsDontRS()
+        public void ShowAllAvailableLogs()
         {
             var allMarkets = logeMain.Where(x => x.IsReserve == 0).ToList();
             foreach (var market in allMarkets)

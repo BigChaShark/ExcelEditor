@@ -24,6 +24,7 @@ public class IndexModel : PageModel
         public int LogNum { get; set; }
         public int zone { get; set; }
         public int UserStatus { get; set; } = 0;
+        public int SheetIndex { get; set; } = 0;
         public List<int> UserLogIDs { get; set; } = new List<int>();
         public List<string> UserLogNames { get; set; } = new List<string>();
     }
@@ -40,6 +41,7 @@ public class IndexModel : PageModel
         public bool IsCorner { get; set; } = false;
         public int Row { get; set; }
         public int Column { get; set; }
+        public DateOnly OpenDateInt { get; set; }
     }
 
     public void OnGet()
@@ -136,7 +138,7 @@ public class IndexModel : PageModel
         var users = ReadUsersFromExcel(originalFilePath);
         bookingSystem.ReserveLogs(users);
         bookingSystem.ShowAllUsers(users);
-        bookingSystem.ShowAllLogsDontRS();
+        bookingSystem.ShowAllAvailableLogs();
         bookingSystem.UpdateDB();
         //ProcessExcelFile(originalFilePath);
         FillUserLogIDsFromLogStore(originalFilePath, users);
@@ -169,24 +171,49 @@ public class IndexModel : PageModel
             var allWorksheets = package.Workbook.Worksheets.ToList();
             //var selectedWorksheets = allWorksheets.Skip(1);
 
-            foreach (var sheet in allWorksheets)
+            //foreach (var sheet in allWorksheets)
+            //{
+            //    int rowCount = sheet.Dimension.Rows;
+
+            //    for (int row = 2; row <= rowCount; row++)
+            //    {
+            //        if (string.IsNullOrEmpty(sheet.Cells[row, 3].Text))
+            //            continue;
+            //        var user = new UserModel();
+            //        int zoneID = GetLogZone.GetLogzone(sheet.Cells[row, 4].Text);
+            //        int marketID = GetLogZone.GetMarketZone(sheet.Cells[row, 4].Text);
+            //        user.UserID = sheet.Cells[row, 3].Text + marketID;
+            //        user.zone = zoneID;
+            //        if (int.TryParse(sheet.Cells[row, 5].Text, out int logNum))
+            //            user.LogNum = logNum;
+            //        users.Add(user);
+            //    }
+            //}
+            for (int sheetIndex = 0; sheetIndex < allWorksheets.Count; sheetIndex++)
             {
+                var sheet = allWorksheets[sheetIndex];
                 int rowCount = sheet.Dimension.Rows;
 
                 for (int row = 2; row <= rowCount; row++)
                 {
-                    if (string.IsNullOrEmpty(sheet.Cells[row, 3].Text))
+                    if (string.IsNullOrEmpty(sheet.Cells[row, 3].Text) || string.IsNullOrEmpty(sheet.Cells[row, 4].Text))
                         continue;
+
                     var user = new UserModel();
                     int zoneID = GetLogZone.GetLogzone(sheet.Cells[row, 4].Text);
-                    user.UserID = sheet.Cells[row, 3].Text + zoneID;
+                    int marketID = GetLogZone.GetMarketZone(sheet.Cells[row, 4].Text);
+
+                    user.UserID = sheet.Cells[row, 3].Text + marketID;
                     user.zone = zoneID;
+                    user.SheetIndex = sheetIndex + 1; // เริ่มจาก 1 แทน 0
+
                     if (int.TryParse(sheet.Cells[row, 5].Text, out int logNum))
                         user.LogNum = logNum;
+
                     users.Add(user);
                 }
             }
-           
+
         }
 
         return users;
@@ -206,8 +233,8 @@ public class IndexModel : PageModel
                 {
                     if (string.IsNullOrEmpty(sheet.Cells[row, 3].Text))
                         continue;
-                    int zoneID = GetLogZone.GetLogzone(sheet.Cells[row, 4].Text);
-                    string id = sheet.Cells[row, 3].Text + zoneID;
+                    int marketID = GetLogZone.GetMarketZone(sheet.Cells[row, 4].Text);
+                    string id = sheet.Cells[row, 3].Text + marketID;
 
                     var matched = x.FirstOrDefault(x => x.UserID == id);
 
