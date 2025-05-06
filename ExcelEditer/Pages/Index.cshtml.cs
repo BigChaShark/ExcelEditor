@@ -18,6 +18,7 @@ public class IndexModel : PageModel
     [BindProperty]
     public IFormFile UploadedFile { get; set; }
 
+    public bool ShowDownloadButton { get; set; } = false;
     public class UserModel
     {
         public string? UserID { get; set; }
@@ -131,10 +132,11 @@ public class IndexModel : PageModel
             }
         }
     }
-
+   
 
     public async Task<IActionResult> OnPostProcessExcelAsync()
     {
+        ShowDownloadButton = false;
         if (UploadedFile == null || UploadedFile.Length == 0)
         {
             ModelState.AddModelError("UploadedFile", "Please upload a valid Excel file.");
@@ -175,6 +177,7 @@ public class IndexModel : PageModel
         HttpContext.Session.SetString("FilePath", originalFilePath);
         TempData["FilePath"] = originalFilePath;
         TempData["Success"] = true;
+        ShowDownloadButton = true;
 
         return Page();
     }
