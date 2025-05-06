@@ -27,6 +27,8 @@ public partial class SaveoneKoratMarketContext : DbContext
 
     public virtual DbSet<SubZone> SubZones { get; set; }
 
+    public virtual DbSet<UserOffline> UserOfflines { get; set; }
+
     public virtual DbSet<Zone> Zones { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -334,6 +336,28 @@ public partial class SaveoneKoratMarketContext : DbContext
             entity.HasOne(d => d.Zone).WithMany(p => p.SubZones)
                 .HasForeignKey(d => d.ZoneId)
                 .HasConstraintName("FK_SubZone_Zone");
+        });
+
+        modelBuilder.Entity<UserOffline>(entity =>
+        {
+            entity.ToTable("User_Offline");
+
+            entity.Property(e => e.Id).HasColumnName("ID");
+            entity.Property(e => e.CreateDateTime).HasColumnType("datetime");
+            entity.Property(e => e.LogeId)
+                .IsUnicode(false)
+                .HasColumnName("LogeID");
+            entity.Property(e => e.LogeName).IsUnicode(false);
+            entity.Property(e => e.Mobile)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Name).IsUnicode(false);
+            entity.Property(e => e.SubZoneId).HasColumnName("SubZoneID");
+            entity.Property(e => e.UserOfflineId)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("UserOfflineID");
+            entity.Property(e => e.ZoneId).HasColumnName("ZoneID");
         });
 
         modelBuilder.Entity<Zone>(entity =>

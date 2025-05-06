@@ -20,13 +20,18 @@ public class IndexModel : PageModel
 
     public class UserModel
     {
-        public string UserID { get; set; }
+        public string? UserID { get; set; }
+        public string Mobile { get; set; }
+        public string? UserName { get; set; }
         public int LogNum { get; set; }
-        public int zone { get; set; }
-        public int UserStatus { get; set; } = 0;
+        public int SubZone { get; set; }
+        public int Zone { get; set; }
+        public int? UserStatus { get; set; } = 0;
         public int SheetIndex { get; set; } = 0;
         public List<int> UserLogIDs { get; set; } = new List<int>();
         public List<string> UserLogNames { get; set; } = new List<string>();
+        public DateOnly CreatDate { get; set; } = DateOnly.FromDateTime(DateTime.Now);
+        public DateTime CreatDateTime { get; set; } = DateTime.Now;
     }
 
     public class LogeModel
@@ -46,6 +51,9 @@ public class IndexModel : PageModel
 
     public void OnGet()
     {
+        TempData.Clear();
+        ViewData.Clear();
+        HttpContext.Session.Clear();
         using (var db = new SaveoneKoratMarketContext())
         {
             DateTime currentDate = DateTime.Now;
@@ -116,6 +124,7 @@ public class IndexModel : PageModel
         }
     }
 
+
     public async Task<IActionResult> OnPostProcessExcelAsync()
     {
         if (UploadedFile == null || UploadedFile.Length == 0)
@@ -123,28 +132,38 @@ public class IndexModel : PageModel
             ModelState.AddModelError("UploadedFile", "Please upload a valid Excel file.");
             return Page();
         }
+
         var uploadDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
         if (!Directory.Exists(uploadDir))
         {
             Directory.CreateDirectory(uploadDir);
         }
-        var originalFilePath = Path.Combine(uploadDir, UploadedFile.FileName);
 
+        if (Directory.Exists(uploadDir))
+        {
+            foreach (var file in Directory.GetFiles(uploadDir))
+            {
+                System.IO.File.Delete(file);
+            }
+        }
+        HttpContext.Session.Clear();
+        TempData.Clear();
+
+        var originalFilePath = Path.Combine(uploadDir, UploadedFile.FileName);
         using (var stream = new FileStream(originalFilePath, FileMode.Create))
         {
             await UploadedFile.CopyToAsync(stream);
         }
+
         BookingSystem bookingSystem = new BookingSystem();
         var users = ReadUsersFromExcel(originalFilePath);
         bookingSystem.ReserveLogs(users);
         bookingSystem.ShowAllUsers(users);
         bookingSystem.ShowAllAvailableLogs();
-        bookingSystem.UpdateDB();
-        //ProcessExcelFile(originalFilePath);
+        bookingSystem.UpdateDB(users);
+
         FillUserLogIDsFromLogStore(originalFilePath, users);
-        //var newFileName = Path.GetFileNameWithoutExtension(UploadedFile.FileName) + "Success" + Path.GetExtension(UploadedFile.FileName);
-        //var newFilePath = Path.Combine(uploadDir, newFileName);
-        //System.IO.File.Move(originalFilePath, newFilePath);
+
         HttpContext.Session.SetString("FilePath", originalFilePath);
         TempData["FilePath"] = originalFilePath;
         TempData["Success"] = true;
@@ -164,6 +183,9 @@ public class IndexModel : PageModel
     }
     public List<UserModel> ReadUsersFromExcel(string filePath)
     {
+        DateTime currentDate = DateTime.Now;
+        var db = new SaveoneKoratMarketContext();
+        var usersTemp = db.UserOfflines.Where(x => x.CreateDate == DateOnly.FromDateTime(currentDate)).Select(x => new {x.UserOfflineId,x.Status}).ToList();
         var users = new List<UserModel>();
         ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
         using (var package = new ExcelPackage(new FileInfo(filePath)))
@@ -198,15 +220,33 @@ public class IndexModel : PageModel
                 {
                     if (string.IsNullOrEmpty(sheet.Cells[row, 3].Text) || string.IsNullOrEmpty(sheet.Cells[row, 4].Text))
                         continue;
-
                     var user = new UserModel();
-                    int zoneID = GetLogZone.GetLogzone(sheet.Cells[row, 4].Text);
-                    int marketID = GetLogZone.GetMarketZone(sheet.Cells[row, 4].Text);
-
-                    user.UserID = sheet.Cells[row, 3].Text + marketID;
-                    user.zone = zoneID;
+                    int subZoneID = GetLogZone.GetLogzone(sheet.Cells[row, 4].Text);
+                    int zoneID = GetLogZone.GetMarketZone(sheet.Cells[row, 4].Text);
+                    var matchInDB = usersTemp.FirstOrDefault(x => x.UserOfflineId == sheet.Cells[row, 3].Text + zoneID);
+                    if (matchInDB != null && matchInDB.Status == 1 )
+                    {
+                        user.UserStatus = matchInDB.Status;
+                        user.UserLogNames.Add("Already RS Today");
+                        user.UserLogIDs.Add(0);
+                    }
+                    else
+                    {
+                        user.UserStatus = 0;
+                    }
+                    var matchInSheet = users.FirstOrDefault(x => x.UserID == sheet.Cells[row, 3].Text + zoneID);
+                    if (matchInSheet != null)
+                    {
+                        continue;
+                    }
+                    user.UserID = sheet.Cells[row, 3].Text + zoneID;
+                    user.Mobile = sheet.Cells[row, 3].Text;
+                    user.Zone = zoneID;
+                    user.SubZone = subZoneID;
+                    user.UserName = sheet.Cells[row, 2].Text;
                     user.SheetIndex = sheetIndex + 1; // เริ่มจาก 1 แทน 0
-
+                    user.CreatDate = DateOnly.FromDateTime(currentDate);
+                    user.CreatDateTime = currentDate;
                     if (int.TryParse(sheet.Cells[row, 5].Text, out int logNum))
                         user.LogNum = logNum;
 

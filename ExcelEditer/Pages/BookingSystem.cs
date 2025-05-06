@@ -93,19 +93,19 @@ namespace ExcelEditor.Pages
                     }
                     return 0;
                 }
-                int index = 1;
-                foreach (var item in logeMain)
-                {
-                    Console.WriteLine($"{index} : C {item.Column}:{item.LogeName} {(item.IsCorner ? " (Corner)" : "")} IsZone : {item.LogeZone} LogID : {item.LogeID}");
-                    index++;
-                }
-                var loge49 = logeMain.Where(x => x.LogeZone == 49).ToList();
-                int index2 = 1;
-                foreach (var item in loge49)
-                {
-                    Console.WriteLine($"CH {index2} : Row {item.Row}:{item.LogeName} {(item.IsCorner ? " (Corner)" : "")} IsZone : {item.LogeZone} LogID : {item.LogeID}");
-                    index2++;
-                }
+                //int index = 1;
+                //foreach (var item in logeMain)
+                //{
+                //    Console.WriteLine($"{index} : C {item.Column}:{item.LogeName} {(item.IsCorner ? " (Corner)" : "")} IsZone : {item.LogeZone} LogID : {item.LogeID}");
+                //    index++;
+                //}
+                //var loge49 = logeMain.Where(x => x.LogeZone == 49).ToList();
+                //int index2 = 1;
+                //foreach (var item in loge49)
+                //{
+                //    Console.WriteLine($"CH {index2} : Row {item.Row}:{item.LogeName} {(item.IsCorner ? " (Corner)" : "")} IsZone : {item.LogeZone} LogID : {item.LogeID}");
+                //    index2++;
+                //}
             }
         }
         public void ReserveLogs(List<UserModel> users)
@@ -126,12 +126,12 @@ namespace ExcelEditor.Pages
                 //{
                 //    Console.WriteLine($"Zone not found at User ID : {user.UserID}");
                 //}
-                totalRows = logeMain.Where(m => m.IsReserve == 0 && m.LogeZone == user.zone).Select(m => (int?)m.LogeIndex).Max() ?? 0;
-                var indexNow = logeMain.Where(m => m.IsReserve == 0 && m.LogeZone == user.zone).OrderBy(m => m.LogeIndex).FirstOrDefault();
+                totalRows = logeMain.Where(m => m.IsReserve == 0 && m.LogeZone == user.SubZone).Select(m => (int?)m.LogeIndex).Max() ?? 0;
+                var indexNow = logeMain.Where(m => m.IsReserve == 0 && m.LogeZone == user.SubZone).OrderBy(m => m.LogeIndex).FirstOrDefault();
                 //Console.WriteLine($"Now Index : {indexNow.LogeIndex}");
                 //currentRow = logeMain.Where(m => m.IsReserve == 0 && m.LogeZone == user.zone).OrderBy(m => m.LogeIndex).Select(m => m.Row).FirstOrDefault();
                 currentRow = indexNow != null ? indexNow.Row : 1;
-                if (ReserveLogsForUserInRow(user, user.LogNum, currentRow, user.zone))
+                if (ReserveLogsForUserInRow(user, user.LogNum, currentRow, user.SubZone))
                 {
                     //currentRow += 1;
                     //SetRow(user.zone);
@@ -140,8 +140,8 @@ namespace ExcelEditor.Pages
                 {
                     for (int i = indexNow.LogeIndex; i <= totalRows; i++)
                     {
-                        currentRow = logeMain.Where(m => m.IsReserve == 0 && m.LogeZone == user.zone && m.LogeIndex == i).Select(m => m.Row).FirstOrDefault();
-                        if (ReserveLogsForUserInRow(user, user.LogNum, currentRow, user.zone))
+                        currentRow = logeMain.Where(m => m.IsReserve == 0 && m.LogeZone == user.SubZone && m.LogeIndex == i).Select(m => m.Row).FirstOrDefault();
+                        if (ReserveLogsForUserInRow(user, user.LogNum, currentRow, user.SubZone))
                         {
                             //currentRow += 1;
                             //SetRow(user.zone);
@@ -188,7 +188,7 @@ namespace ExcelEditor.Pages
                 .ToList();
             if (availableLogs.Count > 0)
             {
-                var selectedLogs = GetFirstConsecutiveLogs(availableLogs, logCount, user.zone);
+                var selectedLogs = GetFirstConsecutiveLogs(availableLogs, logCount, user.SubZone);
                 if (selectedLogs != null)
                 {
                     var names = logeMain.Where(m => selectedLogs.Contains(m.LogeID) && m.Row == row).Select(m => m.LogeName).ToList();
@@ -243,35 +243,95 @@ namespace ExcelEditor.Pages
                 logeMain.First(m => m.LogeID == logID).IsReserve = 1;
             }
         }
-        public void UpdateDB()
+        public void UpdateDB(List<UserModel> users)
         {
-            //using (var db = new SaveoneKoratMarketContext())
-            //{
-            //    foreach (var loge in logeMain)
-            //    {
-            //        var targetLoge = db.LogeTempOfflines.FirstOrDefault(x => x.LogeId == loge.LogeID && x.OpenDateInt == loge.OpenDateInt);
-            //        if (targetLoge != null)
-            //        {
-            //            targetLoge.Status = loge.IsReserve;
-            //        }
-            //    }
-            //    db.SaveChanges();
-            //}
+            UpdateLoges();
+            UpdateUsers(users);
+        }
+        public void UpdateLoges()
+        {
+            using (var db = new SaveoneKoratMarketContext())
+            {
+                foreach (var loge in logeMain)
+                {
+                    var targetLoge = db.LogeTempOfflines.FirstOrDefault(x => x.LogeId == loge.LogeID && x.OpenDateInt == loge.OpenDateInt);
+                    if (targetLoge != null)
+                    {
+                        targetLoge.Status = loge.IsReserve;
+                    }
+                }
+                db.SaveChanges();
+            }
+        }
+        public void UpdateUsers(List<UserModel> users)
+        {
+            using (var db = new SaveoneKoratMarketContext())
+            {
+                DateTime currentDate = DateTime.Now;
+                var userCurrent = db.UserOfflines.Where(x => x.CreateDate == DateOnly.FromDateTime(currentDate));
+                var userToAdd = new List<UserOffline>();
+                foreach (var user in users)
+                {
+                    var isSame = userCurrent.FirstOrDefault(x => (x.UserOfflineId == user.UserID));
+                    if (isSame == null)
+                    {
+                        var userOffline = new UserOffline
+                        {
+                            UserOfflineId = user.UserID,
+                            Name = user.UserName,
+                            Mobile = user.Mobile,
+                            Status = user.UserStatus,
+                            LogeQty = user.LogNum,
+                            ZoneId = user.Zone,
+                            SubZoneId = user.SubZone,
+                            LogeName = string.Join(", ", user.UserLogNames),
+                            LogeId = string.Join(", ", user.UserLogIDs),
+                            CreateDate = DateOnly.FromDateTime(currentDate),
+                            CreateDateTime = currentDate,
+                            CreateBy = 113,
+                        };
+                        userToAdd.Add(userOffline);
+                    }
+                    else
+                    {
+                        if (isSame.Status == 0)
+                        {
+                            isSame.Status = user.UserStatus;
+                            isSame.LogeQty = user.LogNum;
+                            isSame.ZoneId = user.Zone;
+                            isSame.SubZoneId = user.SubZone;
+                            isSame.LogeName = string.Join(", ", user.UserLogNames);
+                            isSame.LogeId = string.Join(", ", user.UserLogIDs);
+                            db.SaveChanges();
+                        }
+                    }
+
+                }
+                if (userToAdd.Count > 0)
+                {
+                    db.UserOfflines.AddRange(userToAdd);
+                    db.SaveChanges();
+                }
+                foreach (var user in userToAdd)
+                {
+                    Console.WriteLine($"UserID: {user.UserOfflineId}, Logs Reserved: {user.LogeName} , Status : {user.Status}");
+                }
+            }
         }
         public void ShowAllAvailableLogs()
         {
-            var allMarkets = logeMain.Where(x => x.IsReserve == 0).ToList();
-            foreach (var market in allMarkets)
-            {
-                Console.WriteLine($"LogID: {market.LogeID}, LogName: {market.LogeName}, IsReserved: {market.IsReserve}");
-            }
+            //var allMarkets = logeMain.Where(x => x.IsReserve == 0).ToList();
+            //foreach (var market in allMarkets)
+            //{
+            //    Console.WriteLine($"LogID: {market.LogeID}, LogName: {market.LogeName}, IsReserved: {market.IsReserve}");
+            //}
         }
         public void ShowAllUsers(List<UserModel> users)
         {
-            foreach (var user in users)
-            {
-                Console.WriteLine($"UserID: {user.UserID}, Logs Reserved: {string.Join(", ", user.UserLogNames)}");
-            }
+            //foreach (var user in users)
+            //{
+            //    Console.WriteLine($"UserID: {user.UserID}, Logs Reserved: {string.Join(", ", user.UserLogNames)}");
+            //}
         }
     }
 }
