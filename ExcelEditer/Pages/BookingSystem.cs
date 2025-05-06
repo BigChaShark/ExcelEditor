@@ -51,11 +51,7 @@ namespace ExcelEditor.Pages
             var loge = db.LogeTempOfflines
                 .Include(x => x.Loge)
                 .ThenInclude(l => l.LogeGroup)
-                .Where(x => (x.Loge.LogeGroup.SubZoneId == 43 || 
-                             x.Loge.LogeGroup.SubZoneId == 45 || 
-                             x.Loge.LogeGroup.SubZoneId == 46 || 
-                             x.Loge.LogeGroup.SubZoneId == 49 || 
-                             x.Loge.LogeGroup.SubZoneId == 50) && (x.OpenDateInt == DateOnly.FromDateTime(nextDate)))
+                .Where(x => x.OpenDateInt == DateOnly.FromDateTime(nextDate))
                 .OrderBy(x => x.Loge.LogeGroup.SubZoneId).ThenBy(x => x.Loge.LogeGroup.GroupSeqNo).ThenBy(x => x.LogeIndex)
                 .ToList();
             if (loge != null)
