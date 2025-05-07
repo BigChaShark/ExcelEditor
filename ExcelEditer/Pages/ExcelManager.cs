@@ -1,0 +1,120 @@
+﻿using ExcelEditor.Models;
+using Newtonsoft.Json;
+using OfficeOpenXml;
+using static IndexModel;
+
+namespace ExcelEditor.Pages
+{
+    public static class ExcelManager
+    {
+        public static List<UserModel> ReadUsersFromExcel(string filePath)
+        {
+            DateTime currentDate = DateTime.Now;
+            var db = new SaveoneKoratMarketContext();
+            var usersTemp = db.UserOfflines.Where(x => x.CreateDate == DateOnly.FromDateTime(currentDate)).Select(x => new { x.UserOfflineId, x.Status }).ToList();
+            var users = new List<UserModel>();
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            using (var package = new ExcelPackage(new FileInfo(filePath)))
+            {
+                var allWorksheets = package.Workbook.Worksheets.ToList();
+                for (int sheetIndex = 0; sheetIndex < allWorksheets.Count; sheetIndex++)
+                {
+                    var sheet = allWorksheets[sheetIndex];
+                    int rowCount = sheet.Dimension.Rows;
+
+                    for (int row = 2; row <= rowCount; row++)
+                    {
+                        if (string.IsNullOrEmpty(sheet.Cells[row, 3].Text) || string.IsNullOrEmpty(sheet.Cells[row, 4].Text))
+                            continue;
+                        var user = new UserModel();
+                        int subZoneID = GetLogZone.GetLogzone(sheet.Cells[row, 4].Text);
+                        int zoneID = GetLogZone.GetMarketZone(sheet.Cells[row, 4].Text);
+                        var matchInDB = usersTemp.FirstOrDefault(x => x.UserOfflineId == sheet.Cells[row, 3].Text + zoneID);
+                        if (matchInDB != null && matchInDB.Status == 1)
+                        {
+                            user.UserStatus = matchInDB.Status;
+                            user.UserLogNames.Add("Already RS Today");
+                            user.UserLogIDs.Add(0);
+                        }
+                        else
+                        {
+                            user.UserStatus = 0;
+                        }
+                        var matchInSheet = users.FirstOrDefault(x => x.UserID == sheet.Cells[row, 3].Text + zoneID);
+                        if (matchInSheet != null)
+                        {
+                            continue;
+                        }
+                        user.UserID = sheet.Cells[row, 3].Text + zoneID;
+                        user.Mobile = sheet.Cells[row, 3].Text;
+                        user.Zone = zoneID;
+                        user.SubZone = subZoneID;
+                        user.UserName = sheet.Cells[row, 2].Text;
+                        user.SheetIndex = sheetIndex + 1; // เริ่มจาก 1 แทน 0
+                        user.CreatDate = DateOnly.FromDateTime(currentDate);
+                        user.CreatDateTime = currentDate;
+                        if (int.TryParse(sheet.Cells[row, 5].Text, out int logNum))
+                            user.LogNum = logNum;
+
+                        users.Add(user);
+                    }
+                }
+
+            }
+
+            return users;
+        }
+        public static void FillUserLogIDsFromLogStore(string filePath, List<UserModel> x)
+        {
+            OfficeOpenXml.ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
+
+            using (var package = new ExcelPackage(new FileInfo(filePath)))
+            {
+                var allWorksheets = package.Workbook.Worksheets.ToList();
+
+                foreach (var sheet in allWorksheets)
+                {
+                    var rowCount = sheet.Dimension.Rows;
+                    for (int row = 2; row <= rowCount; row++)
+                    {
+                        if (string.IsNullOrEmpty(sheet.Cells[row, 3].Text))
+                            continue;
+                        int marketID = GetLogZone.GetMarketZone(sheet.Cells[row, 4].Text);
+                        string id = sheet.Cells[row, 3].Text + marketID;
+
+                        var matched = x.FirstOrDefault(x => x.UserID == id);
+
+                        if (matched != null && matched.UserLogIDs.Any())
+                        {
+                            string userLogIDsString = string.Join(",", matched.UserLogNames);
+                            sheet.Cells[row, 8].Value = userLogIDsString; // เติมใน column 8
+                        }
+                    }
+                }
+                package.Save();
+            }
+        }
+        public static string SaveUsersToTempFile(List<UserModel> users)
+        {
+            var tempDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "temp");
+            if (!Directory.Exists(tempDir))
+            {
+                Directory.CreateDirectory(tempDir);
+            }
+            var fileName = $"users_{Guid.NewGuid()}.json";
+            var filePath = Path.Combine(tempDir, fileName);
+            var json = JsonConvert.SerializeObject(users);
+            System.IO.File.WriteAllText(filePath, json);
+            return fileName;
+        }
+
+        public static List<UserModel> LoadUsersFromTempFile(string fileName)
+        {
+            var tempPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "temp", fileName);
+            if (!System.IO.File.Exists(tempPath)) return new List<UserModel>();
+
+            var json = System.IO.File.ReadAllText(tempPath);
+            return JsonConvert.DeserializeObject<List<UserModel>>(json);
+        }
+    }
+}

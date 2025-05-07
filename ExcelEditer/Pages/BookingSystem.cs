@@ -171,7 +171,7 @@ namespace ExcelEditor.Pages
             //}
         }
 
-        private bool ReserveLogsForUserInRow(UserModel user, int logCount, int row, int zone)
+        private bool ReserveLogsForUserInRow(UserModel user, int? logCount, int row, int zone)
         {
             if (logCount < 1 || logCount > 3)
             {
@@ -204,11 +204,11 @@ namespace ExcelEditor.Pages
             }
 
         }
-        private List<int> GetFirstConsecutiveLogs(List<int> availableLogs, int logCount, int zone)
+        private List<int> GetFirstConsecutiveLogs(List<int> availableLogs, int? logCount, int zone)
         {
             for (int i = 0; i <= availableLogs.Count - logCount; i++)
             {
-                var subset = availableLogs.Skip(i).Take(logCount).ToList();
+                var subset = availableLogs.Skip(i).Take((int)logCount).ToList();
                 if (subset.Count == logCount && IsConsecutive(subset) && CountCornerLogs(subset) <= 1)
                 {
                     return subset;
