@@ -89,7 +89,7 @@ public class IndexModel : PageModel
                                       || x.Loge.LogeGroup.SubZoneId == 38 || x.Loge.LogeGroup.SubZoneId == 2
                                       || x.Loge.LogeGroup.SubZoneId == 3  || x.Loge.LogeGroup.SubZoneId == 4
                                       || x.Loge.LogeGroup.SubZoneId == 5  || x.Loge.LogeGroup.SubZoneId == 21
-                                      || x.Loge.LogeGroup.SubZoneId == 22 || x.Loge.LogeGroup.SubZoneId == 41
+                                      || x.Loge.LogeGroup.SubZoneId == 34 || x.Loge.LogeGroup.SubZoneId == 41
                                       || x.Loge.LogeGroup.SubZoneId == 7  || x.Loge.LogeGroup.SubZoneId == 16
                                       || x.Loge.LogeGroup.SubZoneId == 48 || x.Loge.LogeGroup.SubZoneId == 43
                               /**/    || x.Loge.LogeGroup.SubZoneId == 45 || x.Loge.LogeGroup.SubZoneId == 46

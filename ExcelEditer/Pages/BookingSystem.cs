@@ -16,6 +16,7 @@ using static IndexModel;
 using System.Text.RegularExpressions;
 using ExcelEditor.Pages;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Linq.Expressions;
 
 namespace ExcelEditor.Pages
 {
@@ -127,17 +128,22 @@ namespace ExcelEditor.Pages
                 //Console.WriteLine($"Now Index : {indexNow.LogeIndex}");
                 //currentRow = logeMain.Where(m => m.IsReserve == 0 && m.LogeZone == user.zone).OrderBy(m => m.LogeIndex).Select(m => m.Row).FirstOrDefault();
                 currentRow = indexNow != null ? indexNow.Row : 1;
-                if (ReserveLogsForUserInRow(user, user.LogNum, currentRow, user.SubZone))
+                if (ReserveLogsForUserInRow(user, currentRow))
                 {
                     //currentRow += 1;
                     //SetRow(user.zone);
                 }
                 else
                 {
+                    if (indexNow == null)
+                    {
+                        Console.WriteLine($"UserID {user.UserID} No available loge");
+                        continue;
+                    }
                     for (int i = indexNow.LogeIndex; i <= totalRows; i++)
                     {
                         currentRow = logeMain.Where(m => m.IsReserve == 0 && m.LogeZone == user.SubZone && m.LogeIndex == i).Select(m => m.Row).FirstOrDefault();
-                        if (ReserveLogsForUserInRow(user, user.LogNum, currentRow, user.SubZone))
+                        if (ReserveLogsForUserInRow(user, currentRow))
                         {
                             //currentRow += 1;
                             //SetRow(user.zone);
@@ -171,20 +177,37 @@ namespace ExcelEditor.Pages
             //}
         }
 
-        private bool ReserveLogsForUserInRow(UserModel user, int? logCount, int row, int zone)
+        private bool ReserveLogsForUserInRow(UserModel user, int row)
         {
-            if (logCount < 1 || logCount > 3)
+            switch (user.Zone)
             {
-                Console.WriteLine($"UserID {user.UserID} Must <= 3 log");
-                return false;
+                case 3:
+                case 5:
+                    if (user.LogNum < 1 || user.LogNum > 5)
+                    {
+                        Console.WriteLine($"UserID {user.UserID} loge Error");
+                        return false;
+                    }
+                break;
+                case 0:
+                    Console.WriteLine($"UserID {user.UserID} loge Error");
+                    return false;
+                default:
+                    if (user.LogNum < 1 || user.LogNum > 3)
+                    {
+                        Console.WriteLine($"UserID {user.UserID} loge Error");
+                        return false;
+                    }
+                    break;
             }
+
             var availableLogs = logeMain
-                .Where(m => m.IsReserve == 0 && m.Row == row && m.LogeZone == zone)
+                .Where(m => m.IsReserve == 0 && m.Row == row && m.LogeZone == user.SubZone)
                 .Select(m => m.LogeID)
                 .ToList();
             if (availableLogs.Count > 0)
             {
-                var selectedLogs = GetFirstConsecutiveLogs(availableLogs, logCount, user.SubZone);
+                var selectedLogs = GetFirstConsecutiveLogs(availableLogs, user.LogNum, user.SubZone);
                 if (selectedLogs != null)
                 {
                     var names = logeMain.Where(m => selectedLogs.Contains(m.LogeID) && m.Row == row).Select(m => m.LogeName).ToList();
@@ -192,7 +215,7 @@ namespace ExcelEditor.Pages
                     user.UserLogNames.AddRange(names);
                     MarkLogeAsReserved(selectedLogs);
                     user.UserStatus = 1;
-                    Console.WriteLine($"UserID {user.UserID} RS {logCount} log SUC...: {string.Join(", ", names)}");
+                    Console.WriteLine($"UserID {user.UserID} RS {user.LogNum} log SUC...: {string.Join(", ", names)}");
                     return true;
                 }
                 Console.WriteLine($"UserID {user.UserID} Can't RS on Row {row}");
