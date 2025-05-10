@@ -199,6 +199,15 @@ namespace ExcelEditor.Pages
                         return false;
                     }
                     break;
+
+                    /*case 7 :  
+                 var availableLogs = logeMain
+                .Where(m => m.IsReserve == 0 && m.LogeZone == user.SubZone)
+                .Select(m => m.LogeIndex)
+                .ToList(); เอา ล็อค index เช็คไม่ได้ใช้ ID 
+                    
+                    และ ถ้าเป็นเคส 7 อาจจะต้องมีการเช็คว่า logCount == 2 ต้อง เริ่มเลขขี้ 1/4 ได้หมด และ ต้องแก้ avilablelogs ให้สอดคล้องกับ การจองของ MU ด้วยการเอา Row ออก
+                */
             }
 
             var availableLogs = logeMain
@@ -229,6 +238,7 @@ namespace ExcelEditor.Pages
         }
         private List<int> GetFirstConsecutiveLogs(List<int> availableLogs, int? logCount, int zone)
         {
+            /* ของ Case 7 ถ้า logCount == 2 ต้อง เริ่มเลขขี้ 1/4 ได้หมด */
             for (int i = 0; i <= availableLogs.Count - logCount; i++)
             {
                 var subset = availableLogs.Skip(i).Take((int)logCount).ToList();

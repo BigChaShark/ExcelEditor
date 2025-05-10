@@ -214,7 +214,17 @@ public class IndexModel : PageModel
                 worksheet.Cells[i + 2, 1].Value = i + 1;
                 worksheet.Cells[i + 2, 2].Value = user.UserName;
                 worksheet.Cells[i + 2, 3].Value = user.Mobile;
-                string userLogIDsString = string.Join(",", user.UserLogNames);
+                if (user.UserLogIDs.Count == 0)
+                {
+                    worksheet.Cells[i + 2, 4].Value = $"{user.UserName} จองไม่สำเร็จค่ะ";
+                    continue;
+                }
+                if (user.UserLogNames.Contains("Already RS Today"))
+                {
+                    worksheet.Cells[i + 2, 4].Value = $"{user.UserName} ได้มีการจองล็อคแล้วค่ะ";
+                    continue;
+                }
+                string userLogIDsString = $"{user.UserName} ได้จองล็อค {string.Join(",", user.UserLogNames)} สำเร็จค่ะ";
                 worksheet.Cells[i + 2, 4].Value = userLogIDsString;
             }
 
