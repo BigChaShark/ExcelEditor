@@ -209,20 +209,40 @@ namespace ExcelEditor.Pages
                     และ ถ้าเป็นเคส 7 อาจจะต้องมีการเช็คว่า logCount == 2 ต้อง เริ่มเลขขี้ 1/4 ได้หมด และ ต้องแก้ avilablelogs ให้สอดคล้องกับ การจองของ MU ด้วยการเอา Row ออก
                 */
             }
-
-            var availableLogs = logeMain
+            var availableLogs = new List<int>();
+            if (user.SubZone==7)
+            {
+               availableLogs = logeMain
+               .Where(m => m.IsReserve == 0 && m.LogeZone == user.SubZone).OrderBy(m => m.LogeIndex)
+               .Select(m => m.LogeIndex)
+               .ToList();
+            }
+            else
+            {
+                availableLogs = logeMain
                 .Where(m => m.IsReserve == 0 && m.Row == row && m.LogeZone == user.SubZone)
                 .Select(m => m.LogeID)
                 .ToList();
+            }
+
+            
             if (availableLogs.Count > 0)
             {
                 var selectedLogs = GetFirstConsecutiveLogs(availableLogs, user.LogNum, user.SubZone);
                 if (selectedLogs != null)
                 {
-                    var names = logeMain.Where(m => selectedLogs.Contains(m.LogeID) && m.Row == row).Select(m => m.LogeName).ToList();
+                    var names = new List<string>();
+                    if (user.SubZone == 7)
+                    {
+                        names = logeMain.Where(m => selectedLogs.Contains(m.LogeIndex) && m.LogeZone == user.SubZone).OrderBy(o => o.LogeIndex).Select(m => m.LogeName).ToList();
+                    }
+                    else
+                    {
+                        names = logeMain.Where(m => selectedLogs.Contains(m.LogeID) && m.Row == row).Select(m => m.LogeName).ToList();
+                    }
                     user.UserLogIDs.AddRange(selectedLogs);
                     user.UserLogNames.AddRange(names);
-                    MarkLogeAsReserved(selectedLogs);
+                    MarkLogeAsReserved(selectedLogs,user.SubZone);
                     user.UserStatus = 1;
                     Console.WriteLine($"UserID {user.UserID} RS {user.LogNum} log SUC...: {string.Join(", ", names)}");
                     return true;
@@ -238,16 +258,37 @@ namespace ExcelEditor.Pages
         }
         private List<int> GetFirstConsecutiveLogs(List<int> availableLogs, int? logCount, int zone)
         {
-            /* ของ Case 7 ถ้า logCount == 2 ต้อง เริ่มเลขขี้ 1/4 ได้หมด */
-            for (int i = 0; i <= availableLogs.Count - logCount; i++)
+            if (zone==7)
             {
-                var subset = availableLogs.Skip(i).Take((int)logCount).ToList();
-                if (subset.Count == logCount && IsConsecutive(subset) && CountCornerLogs(subset) <= 1)
+                for (int i = 0; i <= availableLogs.Count - logCount; i++)
                 {
-                    return subset;
+                    if (logCount==2 && availableLogs[i] % 2 == 0)
+                    {
+                        continue;
+                    }
+                    var subset = availableLogs.Skip(i).Take((int)logCount).ToList();
+                    if (subset.Count == logCount && IsConsecutive(subset))
+                    {
+                        return subset;
+                    }
                 }
+                return null;
+            }
+            else
+            {
+                for (int i = 0; i <= availableLogs.Count - logCount; i++)
+                {
+                    var subset = availableLogs.Skip(i).Take((int)logCount).ToList();
+                    if (subset.Count == logCount && IsConsecutive(subset) && CountCornerLogs(subset) <= 1)
+                    {
+                        return subset;
+                    }
+                }
+                return null;
             }
             return null;
+            /* ของ Case 7 ถ้า logCount == 2 ต้อง เริ่มเลขขี้ 1/4 ได้หมด */
+
         }
 
         private bool IsConsecutive(List<int> logIDs)
@@ -265,11 +306,18 @@ namespace ExcelEditor.Pages
             return logIDs.Count(logID => logeMain.First(m => m.LogeID == logID).IsCorner);
         }
 
-        private void MarkLogeAsReserved(List<int> logIDs)
+        private void MarkLogeAsReserved(List<int> logIDs , int zone)
         {
             foreach (var logID in logIDs)
             {
-                logeMain.First(m => m.LogeID == logID).IsReserve = 1;
+                if(zone == 7)
+                {
+                    logeMain.First(m => m.LogeIndex == logID && m.LogeZone == zone).IsReserve = 1;
+                }
+                else {
+                    logeMain.First(m => m.LogeID == logID).IsReserve = 1;
+                }
+                    
             }
         }
         public void UpdateDB(List<UserModel> users)
