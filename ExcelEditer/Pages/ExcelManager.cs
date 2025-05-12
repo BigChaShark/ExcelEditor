@@ -64,6 +64,36 @@ namespace ExcelEditor.Pages
 
             return users;
         }
+
+
+
+        public static List<UserSummaryModel> ReadUploadedSummary(IFormFile file)
+        {
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            var users = new List<UserSummaryModel>();
+            using (var stream = new MemoryStream())
+            {
+                file.CopyTo(stream);
+                using (var package = new ExcelPackage(stream))
+                {
+                    var worksheet = package.Workbook.Worksheets[0];
+                    int rowCount = worksheet.Dimension.Rows;
+
+                    for (int row = 2; row <= rowCount; row++)
+                    {
+                        users.Add(new UserSummaryModel
+                        {
+                            UserName = worksheet.Cells[row, 2].Text,
+                            Mobile = worksheet.Cells[row, 3].Text,
+                            Message = worksheet.Cells[row, 4].Text
+                        });
+                    }
+                }
+            }
+            return users;
+        }
+
+
         public static void FillUserLogIDsFromLogStore(string filePath, List<UserModel> x)
         {
             OfficeOpenXml.ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
@@ -107,6 +137,19 @@ namespace ExcelEditor.Pages
             System.IO.File.WriteAllText(filePath, json);
             return fileName;
         }
+        public static string SaveSummaryUsersToTempFile(List<UserSummaryModel> users)
+        {
+            var tempDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "temp");
+            if (!Directory.Exists(tempDir))
+            {
+                Directory.CreateDirectory(tempDir);
+            }
+            var fileName = $"users_{Guid.NewGuid()}.json";
+            var filePath = Path.Combine(tempDir, fileName);
+            var json = JsonConvert.SerializeObject(users);
+            System.IO.File.WriteAllText(filePath, json);
+            return fileName;
+        }
 
         public static List<UserModel> LoadUsersFromTempFile(string fileName)
         {
@@ -115,6 +158,14 @@ namespace ExcelEditor.Pages
 
             var json = System.IO.File.ReadAllText(tempPath);
             return JsonConvert.DeserializeObject<List<UserModel>>(json);
+        }
+        public static List<UserSummaryModel> LoadUsersFromSummaryTemp(string fileName)
+        {
+            var tempPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "temp", fileName);
+            if (!System.IO.File.Exists(tempPath)) return new List<UserSummaryModel>();
+
+            var json = System.IO.File.ReadAllText(tempPath);
+            return JsonConvert.DeserializeObject<List<UserSummaryModel>>(json);
         }
     }
 }

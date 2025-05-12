@@ -4,10 +4,10 @@
     ViewData["Title"] = "Upload File";
 }
 
-<h2>Upload File</h2>
+<h2>จองล็อค</h2>
 
 <form method="post" enctype="multipart/form-data">
-    <input type="file" asp-for="UploadedFile" />
+    <input type="file" asp-for="UploadedFile" id="main-file" />
     <button type="submit" asp-page-handler="ProcessExcel">Upload & Process</button>
 </form>
 
@@ -21,29 +21,87 @@
 }
 @if (Model.ShowDownloadButton)
 {
-    <div class="mt-3" id="download-button-container">
+    <div id="download-button-all" style="display: flex; gap: 10px; flex-wrap: wrap;">
         <a asp-page-handler="DownloadFile" class="btn btn-success">Download Processed File</a>
-    </div>
-    <div class="mt-3" id="download-button-sum">
         <form method="post" asp-page-handler="DownloadSummaryExcel">
             <input type="hidden" name="tempFileName" value="@TempData["TempUserFile"]" />
             <button type="submit" class="btn btn-primary">Download User Summary</button>
         </form>
+        <form method="post" asp-page-handler="SendSMS" id="send-sms-form">
+            <input type="hidden" name="tempFile" value="@TempData["TempUserFile"]" />
+            <input type="hidden" name="tempFileName" value="TempUserFile" />
+            <button type="submit" class="btn btn-primary">Send SMS</button>
+        </form>
     </div>
 }
+
+
+<hr style="border-top: 5px solid Gray; margin: 20px 0;" />
+
+
+<h2>ส่ง SMS แบบ Manual</h2>
+<form method="post" enctype="multipart/form-data" asp-page-handler="UploadSummary">
+    <input type="file" asp-for="UploadedSummaryFile" id="summary-file"/>
+    <button type="submit">Read Summary</button>
+</form>
+@if (Model.UploadedSummaryFile != null)
+{
+    <p id="upload-success-msg">File uploaded successfully: @Model.UploadedSummaryFile.FileName</p>
+}
+@if (Model.ShowSummaryButton)
+{
+    <div id="sms-button" style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <form method="post" asp-page-handler="SendSMS" id="send-sms-form">
+            <input type="hidden" name="tempFile" value="@TempData["TempSummaryUser"]" />
+            <input type="hidden" name="tempFileName" value="TempSummaryUser" />
+            <button type="submit" class="btn btn-primary">Send SMS</button>
+        </form>
+    </div>
+		
+}
 <script>
-    document.querySelector('input[type="file"]').addEventListener('change', function () {
-        const downloadBtn = document.getElementById('download-button-container');
+    document.getElementById('main-file').addEventListener('change', function () {
+        
+        const downloadBtn = document.getElementById('download-button-all');
         if (downloadBtn) {
             downloadBtn.style.display = 'none';
-        }
-        const downloadSumBtn = document.getElementById('download-button-sum');
-        if (downloadSumBtn) {
-            downloadSumBtn.style.display = 'none';
         }
         const successMsg = document.getElementById('upload-success-msg');
         if (successMsg) {
             successMsg.style.display = 'none';
         }
     });
+
+     document.getElementById('summary-file').addEventListener('change', function () {
+
+        const sendSMSbtn = document.getElementById('sms-button');
+        if (sendSMSbtn) {
+            downloadBtn.style.display = 'none';
+        }
+        
+    });
+        document.getElementById('send-sms-form').addEventListener('submit', async function (e) {
+        e.preventDefault(); // ป้องกันการรีเฟรชหน้า
+
+        const form = e.target;
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch('?handler=SendSMS', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                const text = await response.text();
+                alert("SMS sent successfully!");
+            } else {
+                alert("Failed to send SMS");
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Error sending SMS");
+        }
+    });
+   
 </script>

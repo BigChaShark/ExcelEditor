@@ -14,13 +14,23 @@ using System.Text.RegularExpressions;
 using ExcelEditor.Pages;
 using Microsoft.Extensions.FileSystemGlobbing;
 using Newtonsoft.Json;
+using static ExcelEditor.Pages.SMSManager;
 
 public class IndexModel : PageModel
 {
+    private readonly SMSManager _smsManager;
+
+    public IndexModel(SMSManager smsManager)
+    {
+        _smsManager = smsManager;
+    }
     [BindProperty]
     public IFormFile UploadedFile { get; set; }
+    public IFormFile UploadedSummaryFile { get; set; }
 
     public bool ShowDownloadButton { get; set; } = false;
+    public bool ShowSummaryButton { get; set; } = false;
+
     public class UserModel
     {
         public string? UserID { get; set; }
@@ -35,6 +45,13 @@ public class IndexModel : PageModel
         public List<string> UserLogNames { get; set; } = new List<string>();
         public DateOnly CreatDate { get; set; } = DateOnly.FromDateTime(DateTime.Now);
         public DateTime CreatDateTime { get; set; } = DateTime.Now;
+    }
+
+    public class UserSummaryModel
+    {
+        public string UserName { get; set; }
+        public string Mobile { get; set; }
+        public string Message {get; set;}
     }
 
     public class LogeModel
@@ -134,7 +151,21 @@ public class IndexModel : PageModel
             }
         }
     }
-   
+
+    public async Task<IActionResult> OnPostUploadSummaryAsync()
+    {
+        ShowSummaryButton = false;
+        if (UploadedSummaryFile == null || UploadedSummaryFile.Length == 0)
+        {
+            ModelState.AddModelError("UploadedSummaryFile", "Please upload a valid summary file.");
+            return Page();
+        }
+        var summaryUsers = ExcelManager.ReadUploadedSummary(UploadedSummaryFile);
+        var usersTemp = ExcelManager.SaveSummaryUsersToTempFile(summaryUsers);
+        TempData["TempSummaryUser"] = usersTemp;
+        ShowSummaryButton = true;
+        return Page();
+    }
 
     public async Task<IActionResult> OnPostProcessExcelAsync()
     {
@@ -227,9 +258,49 @@ public class IndexModel : PageModel
                 string userLogIDsString = $"{user.UserName} ได้จองล็อค {string.Join(",", user.UserLogNames)} สำเร็จค่ะ";
                 worksheet.Cells[i + 2, 4].Value = userLogIDsString;
             }
-
+            
             var stream = new MemoryStream(package.GetAsByteArray());
             return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "UserSummary.xlsx");
         }
+    }
+    public IActionResult OnPostSendSMS(string tempFile ,string tempFileName)
+    {
+        string message = "";
+        if (tempFileName == "TempUserFile")
+        {
+            var users = ExcelManager.LoadUsersFromTempFile(tempFile);
+            for (int i = 0; i < users.Count; i++)
+            {
+                var user = users[i];
+                if (user.UserLogIDs.Count == 0)
+                {
+                    message = $"{user.UserName} จองไม่สำเร็จค่ะ";
+                    _smsManager.SendSMS(user.Mobile, message);
+                    continue;
+                }
+                if (user.UserLogNames.Contains("Already RS Today"))
+                {
+                    message = $"{user.UserName} ได้มีการจองล็อคแล้วค่ะ";
+                    _smsManager.SendSMS(user.Mobile, message);
+                    continue;
+                }
+                string userLogIDsString = $"{user.UserName} ได้จองล็อค {string.Join(",", user.UserLogNames)} สำเร็จค่ะ";
+                message = userLogIDsString;
+                _smsManager.SendSMS(user.Mobile, message);
+            }
+            return new OkResult();
+        }
+        else if (tempFileName == "TempSummaryUser")
+        {
+            var users = ExcelManager.LoadUsersFromSummaryTemp(tempFile);
+            for (int i = 0; i < users.Count; i++)
+            {
+                var user = users[i];
+                message = user.Message;
+                _smsManager.SendSMS(user.Mobile, message);
+            }
+            return new OkResult();
+        }
+        return Content("Can't send sms");
     }
 }
