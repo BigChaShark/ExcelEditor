@@ -30,7 +30,7 @@
         <form method="post" asp-page-handler="SendSMS" id="send-sms-form">
             <input type="hidden" name="tempFile" value="@TempData["TempUserFile"]" />
             <input type="hidden" name="tempFileName" value="TempUserFile" />
-            <button type="submit" class="btn btn-primary">Send SMS</button>
+            <button type="submit" class="btn btn-secondary" >Send SMS</button>
         </form>
     </div>
 }
@@ -39,10 +39,10 @@
 <hr style="border-top: 5px solid Gray; margin: 20px 0;" />
 
 
-<h2>ส่ง SMS แบบ Manual</h2>
+<h2>ส่ง SMS</h2>
 <form method="post" enctype="multipart/form-data" asp-page-handler="UploadSummary">
     <input type="file" asp-for="UploadedSummaryFile" id="summary-file"/>
-    <button type="submit">Read Summary</button>
+    <button type="submit">Upload & Process</button>
 </form>
 @if (Model.UploadedSummaryFile != null)
 {
@@ -54,7 +54,7 @@
         <form method="post" asp-page-handler="SendSMS" id="send-sms-form">
             <input type="hidden" name="tempFile" value="@TempData["TempSummaryUser"]" />
             <input type="hidden" name="tempFileName" value="TempSummaryUser" />
-            <button type="submit" class="btn btn-primary">Send SMS</button>
+            <button type="submit" class="btn btn-secondary">Send SMS</button>
         </form>
     </div>
 		
