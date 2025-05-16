@@ -24,14 +24,6 @@ namespace ExcelEditor.Pages
     {
         private List<LogeModel> logeMain = new List<LogeModel>();
         private int totalRows;
-        private Dictionary<int, int> currentRows = new Dictionary<int, int>
-        {
-            { 43, 1 },
-            { 45, 1 },
-            { 46, 1 },
-            { 49, 1 },
-            { 50, 1 }
-        };
         public BookingSystem()
         {
             DateTime currentDate = DateTime.Now;
@@ -137,7 +129,7 @@ namespace ExcelEditor.Pages
                 {
                     if (indexNow == null)
                     {
-                        Console.WriteLine($"UserID {user.UserID} No available loge");
+                        Console.WriteLine($"UserID {user.UserOfflineID} No available loge");
                         continue;
                     }
                     for (int i = indexNow.LogeIndex; i <= totalRows; i++)
@@ -185,17 +177,17 @@ namespace ExcelEditor.Pages
                 case 5:
                     if (user.LogNum < 1 || user.LogNum > 5)
                     {
-                        Console.WriteLine($"UserID {user.UserID} loge Error");
+                        Console.WriteLine($"UserID {user.UserOfflineID} loge Error");
                         return false;
                     }
                 break;
                 case 0:
-                    Console.WriteLine($"UserID {user.UserID} loge Error");
+                    Console.WriteLine($"UserID {user.UserOfflineID} loge Error");
                     return false;
                 default:
                     if (user.LogNum < 1 || user.LogNum > 3)
                     {
-                        Console.WriteLine($"UserID {user.UserID} loge Error");
+                        Console.WriteLine($"UserID {user.UserOfflineID} loge Error");
                         return false;
                     }
                     break;
@@ -243,11 +235,12 @@ namespace ExcelEditor.Pages
                     user.UserLogIDs.AddRange(selectedLogs);
                     user.UserLogNames.AddRange(names);
                     MarkLogeAsReserved(selectedLogs,user.SubZone);
+                    PriceCalSystem.TotalPrice(user);
                     user.UserStatus = 1;
-                    Console.WriteLine($"UserID {user.UserID} RS {user.LogNum} log SUC...: {string.Join(", ", names)}");
+                    Console.WriteLine($"UserID {user.UserOfflineID} RS {user.LogNum} log SUC...: {string.Join(", ", names)}");
                     return true;
                 }
-                Console.WriteLine($"UserID {user.UserID} Can't RS on Row {row}");
+                Console.WriteLine($"UserID {user.UserOfflineID} Can't RS on Row {row}");
                 return false;
             }
             else
@@ -323,7 +316,7 @@ namespace ExcelEditor.Pages
         public void UpdateDB(List<UserModel> users)
         {
             UpdateLoges();
-            UpdateUsers(users);
+            UpdateUserOffline(users);
         }
         public void UpdateLoges()
         {
@@ -340,7 +333,7 @@ namespace ExcelEditor.Pages
                 db.SaveChanges();
             }
         }
-        public void UpdateUsers(List<UserModel> users)
+        public void UpdateUserOffline(List<UserModel> users)
         {
             using (var db = new SaveoneKoratMarketContext())
             {
@@ -349,20 +342,24 @@ namespace ExcelEditor.Pages
                 var userToAdd = new List<UserOffline>();
                 foreach (var user in users)
                 {
-                    var isSame = userCurrent.FirstOrDefault(x => (x.UserOfflineId == user.UserID));
+                    var isSame = userCurrent.FirstOrDefault(x => (x.UserOfflineId == user.UserOfflineID));
                     if (isSame == null)
                     {
                         var userOffline = new UserOffline
                         {
-                            UserOfflineId = user.UserID,
+                            UserOfflineId = user.UserOfflineID,
                             Name = user.UserName,
                             Mobile = user.Mobile,
-                            Status = user.UserStatus,
-                            LogeQty = user.LogNum,
+                            Status = (int)user.UserStatus,
+                            LogeQty = (int)user.LogNum,
                             ZoneId = user.Zone,
                             SubZoneId = user.SubZone,
                             LogeName = string.Join(", ", user.UserLogNames),
                             LogeId = string.Join(", ", user.UserLogIDs),
+                            LogeAmount = user.LogeAmount,
+                            ElectricityAmount = user.ElectricityAmount,
+                            ElectronicAmount = user.ElectronicAmount,
+                            TotalAmount = user.TotalAmount,
                             CreateDate = DateOnly.FromDateTime(currentDate),
                             CreateDateTime = currentDate,
                             CreateBy = 113,
@@ -373,8 +370,8 @@ namespace ExcelEditor.Pages
                     {
                         if (isSame.Status == 0)
                         {
-                            isSame.Status = user.UserStatus;
-                            isSame.LogeQty = user.LogNum;
+                            isSame.Status = (int)user.UserStatus;
+                            isSame.LogeQty = (int)user.LogNum;
                             isSame.ZoneId = user.Zone;
                             isSame.SubZoneId = user.SubZone;
                             isSame.LogeName = string.Join(", ", user.UserLogNames);

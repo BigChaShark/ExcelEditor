@@ -40,12 +40,12 @@ namespace ExcelEditor.Pages
                         {
                             user.UserStatus = 0;
                         }
-                        var matchInSheet = users.FirstOrDefault(x => x.UserID == sheet.Cells[row, 3].Text + zoneID);
+                        var matchInSheet = users.FirstOrDefault(x => x.UserOfflineID == sheet.Cells[row, 3].Text + zoneID);
                         if (matchInSheet != null)
                         {
                             continue;
                         }
-                        user.UserID = sheet.Cells[row, 3].Text + zoneID;
+                        user.UserOfflineID = sheet.Cells[row, 3].Text + zoneID;
                         user.Mobile = sheet.Cells[row, 3].Text;
                         user.Zone = zoneID;
                         user.SubZone = subZoneID;
@@ -55,7 +55,12 @@ namespace ExcelEditor.Pages
                         user.CreatDateTime = currentDate;
                         if (int.TryParse(sheet.Cells[row, 5].Text, out int logNum))
                             user.LogNum = logNum;
-
+                        if (int.TryParse(sheet.Cells[row, 6].Text==null?"0":sheet.Cells[row, 6].Text, out int fullLogeQty))
+                            user.FullLogeQty = fullLogeQty;
+                        if (int.TryParse(sheet.Cells[row, 7].Text == null ? "0" : sheet.Cells[row, 7].Text, out int electricityQty))
+                            user.ElectricityQty = electricityQty;
+                        if (int.TryParse(sheet.Cells[row, 8].Text == null ? "0" : sheet.Cells[row, 8].Text, out int electronicQty))
+                            user.ElectronicQty = electronicQty;
                         users.Add(user);
                     }
                 }
@@ -112,12 +117,13 @@ namespace ExcelEditor.Pages
                         int marketID = GetLogZone.GetMarketZone(sheet.Cells[row, 4].Text);
                         string id = sheet.Cells[row, 3].Text + marketID;
 
-                        var matched = x.FirstOrDefault(x => x.UserID == id);
+                        var matched = x.FirstOrDefault(x => x.UserOfflineID == id);
 
                         if (matched != null && matched.UserLogIDs.Any())
                         {
                             string userLogIDsString = string.Join(",", matched.UserLogNames);
-                            sheet.Cells[row, 8].Value = userLogIDsString; // เติมใน column 8
+                            sheet.Cells[row, 9].Value = userLogIDsString;
+                            sheet.Cells[row, 10].Value = matched.TotalAmount;
                         }
                     }
                 }

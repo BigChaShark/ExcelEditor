@@ -44,4 +44,8 @@ public partial class Loge
     public virtual ICollection<LogeTempMaster> LogeTempMasters { get; set; } = new List<LogeTempMaster>();
 
     public virtual ICollection<LogeTempOffline> LogeTempOfflines { get; set; } = new List<LogeTempOffline>();
+
+    public virtual ICollection<ReservationLogeDetail> ReservationLogeDetails { get; set; } = new List<ReservationLogeDetail>();
+
+    public virtual ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
 }

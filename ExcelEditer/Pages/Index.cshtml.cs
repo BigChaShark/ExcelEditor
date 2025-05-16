@@ -33,7 +33,7 @@ public class IndexModel : PageModel
 
     public class UserModel
     {
-        public string? UserID { get; set; }
+        public string? UserOfflineID { get; set; }
         public string Mobile { get; set; }
         public string? UserName { get; set; }
         public int? LogNum { get; set; }
@@ -41,6 +41,13 @@ public class IndexModel : PageModel
         public int Zone { get; set; }
         public int? UserStatus { get; set; } = 0;
         public int SheetIndex { get; set; } = 0;
+        public int FullLogeQty { get; set; } = 0;
+        public int ElectricityQty { get; set; } = 0;
+        public int ElectronicQty { get; set; } = 0;
+        public decimal ElectronicAmount { get; set; } = 0;
+        public decimal ElectricityAmount { get; set; } = 0;
+        public decimal LogeAmount { get; set; } = 0;
+        public decimal TotalAmount { get; set; } = 0;
         public List<int> UserLogIDs { get; set; } = new List<int>();
         public List<string> UserLogNames { get; set; } = new List<string>();
         public DateOnly CreatDate { get; set; } = DateOnly.FromDateTime(DateTime.Now);
