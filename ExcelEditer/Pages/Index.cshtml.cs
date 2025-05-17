@@ -44,6 +44,8 @@ public class IndexModel : PageModel
         public int FullLogeQty { get; set; } = 0;
         public int ElectricityQty { get; set; } = 0;
         public int ElectronicQty { get; set; } = 0;
+        public int ElectricityID { get; set; } = 0;
+        public int ElectronicID { get; set; } = 0;
         public decimal ElectronicAmount { get; set; } = 0;
         public decimal ElectricityAmount { get; set; } = 0;
         public decimal LogeAmount { get; set; } = 0;
@@ -210,7 +212,7 @@ public class IndexModel : PageModel
         bookingSystem.ReserveLogs(users);
         bookingSystem.ShowAllUsers(users);
         bookingSystem.ShowAllAvailableLogs();
-        bookingSystem.UpdateDB(users);
+        //bookingSystem.UpdateDB(users);
         var usersTemp = ExcelManager.SaveUsersToTempFile(users);
         ExcelManager.FillUserLogIDsFromLogStore(originalFilePath, users);
         HttpContext.Session.SetString("FilePath", originalFilePath);

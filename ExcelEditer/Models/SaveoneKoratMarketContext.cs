@@ -532,7 +532,9 @@ public partial class SaveoneKoratMarketContext : DbContext
             entity.Property(e => e.Id).HasColumnName("ID");
             entity.Property(e => e.CreateDateTime).HasColumnType("datetime");
             entity.Property(e => e.ElectricityAmount).HasColumnType("decimal(9, 2)");
+            entity.Property(e => e.ElectricityId).HasColumnName("ElectricityID");
             entity.Property(e => e.ElectronicAmount).HasColumnType("decimal(9, 2)");
+            entity.Property(e => e.ElectronicId).HasColumnName("ElectronicID");
             entity.Property(e => e.LogeAmount).HasColumnType("decimal(9, 2)");
             entity.Property(e => e.LogeId)
                 .IsUnicode(false)

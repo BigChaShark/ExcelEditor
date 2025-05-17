@@ -27,6 +27,10 @@ public partial class UserOffline
 
     public decimal LogeAmount { get; set; }
 
+    public int ElectricityId { get; set; }
+
+    public int ElectronicId { get; set; }
+
     public decimal ElectricityAmount { get; set; }
 
     public decimal ElectronicAmount { get; set; }

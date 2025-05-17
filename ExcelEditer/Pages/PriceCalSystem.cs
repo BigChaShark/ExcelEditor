@@ -21,11 +21,13 @@ namespace ExcelEditor.Pages
             var db = new SaveoneKoratMarketContext();
             if (user.ElectricityQty == 0)
                 return 0;
-            var electricityRate = db.ReservationLogeElectricityTypes.Where(x => x.Description.Contains(user.ElectricityQty.ToString()))
-                .Select(s => s.Price)
+            var electricityRate = db.ReservationLogeElectricityTypes
+                .Where(x => x.Description.Contains(user.ElectricityQty.ToString()))
                 .FirstOrDefault();
-            if (electricityRate != null) {
-                return (decimal)electricityRate;
+            if (electricityRate != null && electricityRate.Price.HasValue)
+            {
+                GetElectricID(1, electricityRate.Id, user);
+                return electricityRate.Price.Value;
             }
             return 0;
         }
@@ -34,12 +36,13 @@ namespace ExcelEditor.Pages
             var db = new SaveoneKoratMarketContext();
             if (user.ElectronicQty == 0)
                 return 0;
-            var electronicRate = db.ReservationLogeElectronicTypes.Where(x => x.Description.Contains(user.ElectronicQty.ToString()))
-                .Select(s => s.Price)
+            var electronicRate = db.ReservationLogeElectronicTypes
+                .Where(x => x.Description.Contains(user.ElectronicQty.ToString()))
                 .FirstOrDefault();
-            if (electronicRate != null)
+            if (electronicRate != null && electronicRate.Price.HasValue)
             {
-                return (decimal)electronicRate;
+                GetElectricID(2, electronicRate.Id, user);
+                return electronicRate.Price.Value;
             }
             return 0;
         }
@@ -73,6 +76,21 @@ namespace ExcelEditor.Pages
             {
                 total = 50*user.FullLogeQty;
                 return total;
+            }
+        }
+
+        public static void GetElectricID(int option, int id , UserModel user)
+        {
+            switch(option)
+            {
+                case 1:
+                    user.ElectricityID = id;
+                    break;
+                case 2:
+                    user.ElectronicID = id;
+                    break;
+                default:
+                    break;
             }
         }
     }

@@ -109,11 +109,24 @@ namespace ExcelEditor.Pages
 
                 foreach (var sheet in allWorksheets)
                 {
+                    sheet.Cells[1, 9].Value = "LogIDs";
+                    sheet.Cells[1, 10].Value = "LogNames";
+                    sheet.Cells[1, 11].Value = "ZoneID";
+                    sheet.Cells[1, 12].Value = "SubZoneID";
+                    sheet.Cells[1, 13].Value = "ElectricityID";
+                    sheet.Cells[1, 14].Value = "ElectronicID";
+                    sheet.Cells[1, 15].Value = "LogeAmount";
+                    sheet.Cells[1, 16].Value = "ElectricityAmount";
+                    sheet.Cells[1, 17].Value = "ElectronicAmount";
+                    sheet.Cells[1, 18].Value = "TotalAmount";
+                    sheet.Cells[1, 19].Value = "CreatDate";
+                    sheet.Cells[1, 20].Value = "CreatDateTime";
                     var rowCount = sheet.Dimension.Rows;
                     for (int row = 2; row <= rowCount; row++)
                     {
                         if (string.IsNullOrEmpty(sheet.Cells[row, 3].Text))
                             continue;
+                        
                         int marketID = GetLogZone.GetMarketZone(sheet.Cells[row, 4].Text);
                         string id = sheet.Cells[row, 3].Text + marketID;
 
@@ -121,9 +134,20 @@ namespace ExcelEditor.Pages
 
                         if (matched != null && matched.UserLogIDs.Any())
                         {
-                            string userLogIDsString = string.Join(",", matched.UserLogNames);
-                            sheet.Cells[row, 9].Value = userLogIDsString;
-                            sheet.Cells[row, 10].Value = matched.TotalAmount;
+                            string userLogNamesString = string.Join(",", matched.UserLogNames);
+                            string userLogIDsString = string.Join(",", matched.UserLogIDs);
+                            sheet.Cells[row, 9].Value = userLogNamesString;
+                            sheet.Cells[row, 10].Value = userLogIDsString;
+                            sheet.Cells[row, 11].Value = matched.Zone;
+                            sheet.Cells[row, 12].Value = matched.SubZone;
+                            sheet.Cells[row, 13].Value = matched.ElectricityID;
+                            sheet.Cells[row, 14].Value = matched.ElectronicID;
+                            sheet.Cells[row, 15].Value = matched.LogeAmount;
+                            sheet.Cells[row, 16].Value = matched.ElectricityAmount;
+                            sheet.Cells[row, 17].Value = matched.ElectronicAmount;
+                            sheet.Cells[row, 18].Value = matched.TotalAmount;
+                            sheet.Cells[row, 19].Value = matched.CreatDate;
+                            sheet.Cells[row, 20].Value = matched.CreatDateTime;
                         }
                     }
                 }
