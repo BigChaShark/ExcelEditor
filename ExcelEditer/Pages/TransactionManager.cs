@@ -3,10 +3,11 @@ using static IndexModel;
 
 namespace ExcelEditor.Pages
 {
-    public class TransactionManager
+    public static class TransactionManager
     {
-        void createTransactionId(UserModel member, DateTime currentDate)
+        public static void createTransactionId(UserModel member)
         {
+            DateTime currentDate = DateTime.Now;
             //Test 0981565947 must chk with status if == 1
             var db = new SaveoneKoratMarketContext();
             //int userId = 113; // Auto
@@ -18,8 +19,8 @@ namespace ExcelEditor.Pages
             int PaymentGatewayId = zone.Contains(subZoneId) ? 14 : 9; // Default => 13 SCB QrCode  // PaymentGateway.Id => 14	, PaymentGateway.Description => GoMoney Wallet
             int PaymentTypeId = zone.Contains(subZoneId) ? 21 : 11; // Default => 18 SCB QrCode || 21 GoMoney Wallet
             //Other GatewayId 9 TypeId 11
-            long memberId = db.Members.Where(x => x.Mobile == member.Mobile).Select(s => s.Id).FirstOrDefault();
-            string memberCode = db.Members.Where(x => x.Mobile == member.Mobile).Select(s => s.Code).FirstOrDefault();
+            long memberId = db.Members.Where(x => x.Mobile == member.Mobile && x.Status == 1).Select(s => s.Id).FirstOrDefault();
+            string memberCode = db.Members.Where(x => x.Mobile == member.Mobile && x.Status == 1).Select(s => s.Code).FirstOrDefault();
             using (var context = new SaveoneKoratMarketContext())
             {
                 using (var dbContextTransaction = context.Database.BeginTransaction())
@@ -69,7 +70,8 @@ namespace ExcelEditor.Pages
                     catch (Exception err)
                     {
                         dbContextTransaction.Rollback();
-                        throw new Exception("Error creating reservation loge: " + err.Message);
+                        var innerMsg = err.InnerException?.Message ?? "";
+                        throw new Exception("Error creating Transection loge detail: " + err.Message + " " + innerMsg, err);
                     }
                 }
             }         

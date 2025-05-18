@@ -7,6 +7,7 @@ namespace ExcelEditor.Pages
 {
     public static class ExcelManager
     {
+        #region Read Excels
         public static List<UserModel> ReadUsersFromExcel(string filePath)
         {
             DateTime currentDate = DateTime.Now;
@@ -55,7 +56,7 @@ namespace ExcelEditor.Pages
                         user.CreatDateTime = currentDate;
                         if (int.TryParse(sheet.Cells[row, 5].Text, out int logNum))
                             user.LogNum = logNum;
-                        if (int.TryParse(sheet.Cells[row, 6].Text==null?"0":sheet.Cells[row, 6].Text, out int fullLogeQty))
+                        if (int.TryParse(sheet.Cells[row, 6].Text == null ? "0" : sheet.Cells[row, 6].Text, out int fullLogeQty))
                             user.FullLogeQty = fullLogeQty;
                         if (int.TryParse(sheet.Cells[row, 7].Text == null ? "0" : sheet.Cells[row, 7].Text, out int electricityQty))
                             user.ElectricityQty = electricityQty;
@@ -98,7 +99,72 @@ namespace ExcelEditor.Pages
             return users;
         }
 
+        public static List<UserModel> ReadUploadedTransection(IFormFile file)
+        {
+            DateTime currentDate = DateTime.Now;
+            var db = new SaveoneKoratMarketContext();
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            var usersTemp = db.UserOfflines.Where(x => x.CreateDate == DateOnly.FromDateTime(currentDate)).Select(x => new { x.UserOfflineId, x.Status }).ToList();
+            var users = new List<UserModel>();
+            using (var stream = new MemoryStream())
+            {
+                file.CopyTo(stream);
+                using (var package = new ExcelPackage(stream))
+                {
+                    var allWorksheets = package.Workbook.Worksheets.ToList();
+                    for (int sheetIndex = 0; sheetIndex < allWorksheets.Count; sheetIndex++)
+                    {
+                        var sheet = allWorksheets[sheetIndex];
+                        int rowCount = sheet.Dimension.Rows;
 
+                        for (int row = 2; row <= rowCount; row++)
+                        {
+                            if (string.IsNullOrEmpty(sheet.Cells[row, 3].Text) || string.IsNullOrEmpty(sheet.Cells[row, 4].Text))
+                                continue;
+                            var user = new UserModel();
+                            int subZoneID = GetLogZone.GetLogzone(sheet.Cells[row, 4].Text);
+                            int zoneID = GetLogZone.GetMarketZone(sheet.Cells[row, 4].Text);
+                            var matchInSheet = users.FirstOrDefault(x => x.UserOfflineID == sheet.Cells[row, 3].Text + zoneID);
+                            if (matchInSheet != null)
+                            {
+                                continue;
+                            }
+                            user.UserOfflineID = sheet.Cells[row, 3].Text + zoneID;
+                            user.Mobile = sheet.Cells[row, 3].Text;
+                            user.Zone = zoneID;
+                            user.SubZone = subZoneID;
+                            user.UserName = sheet.Cells[row, 2].Text;
+                            user.SheetIndex = sheetIndex + 1;
+                            user.CreatDate = DateOnly.FromDateTime(currentDate);
+                            user.CreatDateTime = currentDate;
+                            if (int.TryParse(sheet.Cells[row, 5].Text, out int logNum))
+                                user.LogNum = logNum;
+                            if (int.TryParse(sheet.Cells[row, 6].Text == null ? "0" : sheet.Cells[row, 6].Text, out int fullLogeQty))
+                                user.FullLogeQty = fullLogeQty;
+                            if (int.TryParse(sheet.Cells[row, 7].Text == null ? "0" : sheet.Cells[row, 7].Text, out int electricityQty))
+                                user.ElectricityQty = electricityQty;
+                            if (int.TryParse(sheet.Cells[row, 8].Text == null ? "0" : sheet.Cells[row, 8].Text, out int electronicQty))
+                                user.ElectronicQty = electronicQty;
+                            user.UserLogNames = sheet.Cells[row, 9].Text.Split(',').ToList();
+                            user.UserLogIDs = sheet.Cells[row, 10].Text.Split(',').Select(int.Parse).ToList();
+                            user.ElectricityID = int.TryParse(sheet.Cells[row, 13].Text, out int electricityID) ? electricityID : 0;
+                            user.ElectronicID = int.TryParse(sheet.Cells[row, 14].Text, out int electronicID) ? electronicID : 0;
+                            user.LogeAmount = decimal.TryParse(sheet.Cells[row, 15].Text, out decimal logeAmount) ? logeAmount : 0;
+                            user.ElectricityAmount = decimal.TryParse(sheet.Cells[row, 16].Text, out decimal electricityAmount) ? electricityAmount : 0;
+                            user.ElectronicAmount = decimal.TryParse(sheet.Cells[row, 17].Text, out decimal electronicAmount) ? electronicAmount : 0;
+                            user.TotalAmount = decimal.TryParse(sheet.Cells[row, 18].Text, out decimal totalAmount) ? totalAmount : 0;
+                            user.CreatDate = DateOnly.TryParse(sheet.Cells[row, 19].Text, out DateOnly creatDate) ? creatDate : DateOnly.FromDateTime(currentDate);
+                            user.CreatDateTime = DateTime.TryParse(sheet.Cells[row, 20].Text, out DateTime creatDateTime) ? creatDateTime : currentDate;
+                            users.Add(user);
+                        }
+                    }
+                }
+            }
+            return users;
+        }
+        #endregion
+
+        #region Fill Data to Excel
         public static void FillUserLogIDsFromLogStore(string filePath, List<UserModel> x)
         {
             OfficeOpenXml.ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
@@ -126,7 +192,7 @@ namespace ExcelEditor.Pages
                     {
                         if (string.IsNullOrEmpty(sheet.Cells[row, 3].Text))
                             continue;
-                        
+
                         int marketID = GetLogZone.GetMarketZone(sheet.Cells[row, 4].Text);
                         string id = sheet.Cells[row, 3].Text + marketID;
 
@@ -154,48 +220,7 @@ namespace ExcelEditor.Pages
                 package.Save();
             }
         }
-        public static string SaveUsersToTempFile(List<UserModel> users)
-        {
-            var tempDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "temp");
-            if (!Directory.Exists(tempDir))
-            {
-                Directory.CreateDirectory(tempDir);
-            }
-            var fileName = $"users_{Guid.NewGuid()}.json";
-            var filePath = Path.Combine(tempDir, fileName);
-            var json = JsonConvert.SerializeObject(users);
-            System.IO.File.WriteAllText(filePath, json);
-            return fileName;
-        }
-        public static string SaveSummaryUsersToTempFile(List<UserSummaryModel> users)
-        {
-            var tempDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "temp");
-            if (!Directory.Exists(tempDir))
-            {
-                Directory.CreateDirectory(tempDir);
-            }
-            var fileName = $"users_{Guid.NewGuid()}.json";
-            var filePath = Path.Combine(tempDir, fileName);
-            var json = JsonConvert.SerializeObject(users);
-            System.IO.File.WriteAllText(filePath, json);
-            return fileName;
-        }
+        #endregion
 
-        public static List<UserModel> LoadUsersFromTempFile(string fileName)
-        {
-            var tempPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "temp", fileName);
-            if (!System.IO.File.Exists(tempPath)) return new List<UserModel>();
-
-            var json = System.IO.File.ReadAllText(tempPath);
-            return JsonConvert.DeserializeObject<List<UserModel>>(json);
-        }
-        public static List<UserSummaryModel> LoadUsersFromSummaryTemp(string fileName)
-        {
-            var tempPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "temp", fileName);
-            if (!System.IO.File.Exists(tempPath)) return new List<UserSummaryModel>();
-
-            var json = System.IO.File.ReadAllText(tempPath);
-            return JsonConvert.DeserializeObject<List<UserSummaryModel>>(json);
-        }
     }
 }

@@ -10,8 +10,8 @@ namespace ExcelEditor.Pages
             using (var context = new SaveoneKoratMarketContext())
             {
                 DateTime currentDate = DateTime.Now;
-                long memberId = context.Members.Where(x => x.Mobile == member.Mobile).Select(s => s.Id).FirstOrDefault();
-                string memberCode = context.Members.Where(x => x.Mobile == member.Mobile).Select(s => s.Code).FirstOrDefault();
+                long memberId = context.Members.Where(x => x.Mobile == member.Mobile && x.Status == 1).Select(s => s.Id).FirstOrDefault();
+                string memberCode = context.Members.Where(x => x.Mobile == member.Mobile && x.Status == 1).Select(s => s.Code).FirstOrDefault();
                 int reservationLogeStatus = 2;
                 int reservationstatus = 1;
                 int zoneId = member.Zone;
@@ -62,18 +62,27 @@ namespace ExcelEditor.Pages
             using (var context = new SaveoneKoratMarketContext())
             {
                 DateTime currentDate = DateTime.Now;
-                long memberId = context.Members.Where(x => x.Mobile == member.Mobile).Select(s => s.Id).FirstOrDefault();
+                long memberId = context.Members
+                    .Where(x => x.Mobile == member.Mobile)
+                    .Select(s => s.Id)
+                    .FirstOrDefault();
+
                 int reservationLogeStatus = 2;
                 int zoneId = member.Zone;
                 int subZoneId = member.SubZone;
+
                 using (var dbContextTransaction = context.Database.BeginTransaction())
                 {
                     try
                     {
-                        var checkreservation = context.ReservationLoges.Where(x => x.MemberId == memberId && x.Status == reservationLogeStatus
-                        && x.CreateDate.Year == currentDate.Year && x.CreateDate.Month == currentDate.Month && x.CreateDate.Day == currentDate.Day
-                        && x.ZoneId == zoneId && (x.SubZoneId == subZoneId)
-                        ).FirstOrDefault();
+                        var checkreservation = context.ReservationLoges
+                            .FirstOrDefault(x =>
+                                x.MemberId == memberId &&
+                                x.Status == reservationLogeStatus &&
+                                x.CreateDate.Date == currentDate.Date && // ใช้ .Date แทนเทียบ Year/Month/Day
+                                x.ZoneId == zoneId &&
+                                x.SubZoneId == subZoneId);
+
                         if (checkreservation != null)
                         {
                             foreach (var logeId in member.UserLogIDs)
@@ -82,21 +91,22 @@ namespace ExcelEditor.Pages
                                 {
                                     ReservationLogeId = checkreservation.Id,
                                     LogeId = logeId,
-                                    ReservationDate = long.Parse(currentDate.ToString("yyyyMMdd")),
+                                    ReservationDate = int.Parse(currentDate.ToString("yyyyMMdd")),
                                     TimeStamp = currentDate
                                 };
                                 context.ReservationLogeDetails.Add(newReservationLogeDetail);
-                                context.SaveChanges();
-                                dbContextTransaction.Commit();
                             }
+                            context.SaveChanges(); 
+                            dbContextTransaction.Commit();
                         }
                     }
                     catch (Exception ex)
                     {
                         dbContextTransaction.Rollback();
-                        throw new Exception("Error creating reservation loge detail: " + ex.Message);
-                    }
+                        var innerMsg = ex.InnerException?.Message ?? "";
+                        throw new Exception("Error creating reservation loge detail: " + ex.Message + " " + innerMsg, ex);
                 }
+            }
             }
         }
     }

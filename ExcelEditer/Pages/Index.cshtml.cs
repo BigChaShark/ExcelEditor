@@ -27,9 +27,11 @@ public class IndexModel : PageModel
     [BindProperty]
     public IFormFile UploadedFile { get; set; }
     public IFormFile UploadedSummaryFile { get; set; }
+    public IFormFile UploadedTransectionFile { get; set; }
 
     public bool ShowDownloadButton { get; set; } = false;
     public bool ShowSummaryButton { get; set; } = false;
+    public bool ShowTransectionButton { get; set; } = false;
 
     public class UserModel
     {
@@ -161,6 +163,7 @@ public class IndexModel : PageModel
         }
     }
 
+    #region Upload Files
     public async Task<IActionResult> OnPostUploadSummaryAsync()
     {
         ShowSummaryButton = false;
@@ -170,12 +173,28 @@ public class IndexModel : PageModel
             return Page();
         }
         var summaryUsers = ExcelManager.ReadUploadedSummary(UploadedSummaryFile);
-        var usersTemp = ExcelManager.SaveSummaryUsersToTempFile(summaryUsers);
+        var usersTemp = TempFileManager.SaveSummaryUsersToTempFile(summaryUsers);
         TempData["TempSummaryUser"] = usersTemp;
         ShowSummaryButton = true;
         return Page();
     }
+    public async Task<IActionResult> OnPostUploadTransectionAsync()
+    {
+        ShowTransectionButton = false;
+        if (UploadedTransectionFile == null || UploadedTransectionFile.Length == 0)
+        {
+            ModelState.AddModelError("UploadedTransectionFile", "Please upload a valid Transection file.");
+            return Page();
+        }
+        var tran = ExcelManager.ReadUploadedTransection(UploadedTransectionFile);
+        var usersTemp = TempFileManager.SaveUsersToTempFile(tran);
+        TempData["TempTransUser"] = usersTemp;
+        ShowTransectionButton = true;
+        return Page();
+    }
+    #endregion
 
+    #region Main Action
     public async Task<IActionResult> OnPostProcessExcelAsync()
     {
         ShowDownloadButton = false;
@@ -213,7 +232,7 @@ public class IndexModel : PageModel
         bookingSystem.ShowAllUsers(users);
         bookingSystem.ShowAllAvailableLogs();
         //bookingSystem.UpdateDB(users);
-        var usersTemp = ExcelManager.SaveUsersToTempFile(users);
+        var usersTemp = TempFileManager.SaveUsersToTempFile(users);
         ExcelManager.FillUserLogIDsFromLogStore(originalFilePath, users);
         HttpContext.Session.SetString("FilePath", originalFilePath);
         TempData["FilePath"] = originalFilePath;
@@ -223,6 +242,73 @@ public class IndexModel : PageModel
 
         return Page();
     }
+    public IActionResult OnPostSentTransection(string tempFile)
+    {
+        var users = TempFileManager.LoadUsersFromTempFile(tempFile);
+        if (users == null || users.Count == 0)
+        {
+            return BadRequest("No users found in the temp file.");
+        }
+        foreach (var user in users)
+        {
+            foreach (var log in user.UserLogIDs)
+            {
+                Console.WriteLine(log);
+            }
+        }
+        BookingSystem bookingSystem = new BookingSystem();
+        bookingSystem.UpdateDB(users);
+        foreach (var user in users)
+        {
+            ReservationManager.createReservationLoge(user);
+            //ReservationManager.createReservationLogeDetail(user);
+            TransactionManager.createTransactionId(user);
+        }
+        return Page();
+    }
+    public IActionResult OnPostSendSMS(string tempFile, string tempFileName)
+    {
+        string message = "";
+        if (tempFileName == "TempUserFile")
+        {
+            var users = TempFileManager.LoadUsersFromTempFile(tempFile);
+            for (int i = 0; i < users.Count; i++)
+            {
+                var user = users[i];
+                if (user.UserLogIDs.Count == 0)
+                {
+                    message = $"{user.UserName} จองไม่สำเร็จค่ะ";
+                    _smsManager.SendSMS(user.Mobile, message);
+                    continue;
+                }
+                if (user.UserLogNames.Contains("Already RS Today"))
+                {
+                    message = $"{user.UserName} ได้มีการจองล็อคแล้วค่ะ";
+                    _smsManager.SendSMS(user.Mobile, message);
+                    continue;
+                }
+                string userLogIDsString = $"{user.UserName} ได้จองล็อค {string.Join(",", user.UserLogNames)} สำเร็จค่ะ";
+                message = userLogIDsString;
+                _smsManager.SendSMS(user.Mobile, message);
+            }
+            return new OkResult();
+        }
+        else if (tempFileName == "TempSummaryUser")
+        {
+            var users = TempFileManager.LoadUsersFromSummaryTemp(tempFile);
+            for (int i = 0; i < users.Count; i++)
+            {
+                var user = users[i];
+                message = user.Message;
+                _smsManager.SendSMS(user.Mobile, message);
+            }
+            return new OkResult();
+        }
+        return Content("Can't send sms");
+    }
+    #endregion
+
+    #region Download Files
     public IActionResult OnGetDownloadFile()
     {
         var filePath = HttpContext.Session.GetString("FilePath");
@@ -237,7 +323,7 @@ public class IndexModel : PageModel
 
     public IActionResult OnPostDownloadSummaryExcel(string tempFileName)
     {
-        var users = ExcelManager.LoadUsersFromTempFile(tempFileName);
+        var users = TempFileManager.LoadUsersFromTempFile(tempFileName);
 
         using (var package = new ExcelPackage())
         {
@@ -267,49 +353,15 @@ public class IndexModel : PageModel
                 string userLogIDsString = $"{user.UserName} ได้จองล็อค {string.Join(",", user.UserLogNames)} สำเร็จค่ะ";
                 worksheet.Cells[i + 2, 4].Value = userLogIDsString;
             }
-            
+
             var stream = new MemoryStream(package.GetAsByteArray());
             return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "UserSummary.xlsx");
         }
     }
-    public IActionResult OnPostSendSMS(string tempFile ,string tempFileName)
-    {
-        string message = "";
-        if (tempFileName == "TempUserFile")
-        {
-            var users = ExcelManager.LoadUsersFromTempFile(tempFile);
-            for (int i = 0; i < users.Count; i++)
-            {
-                var user = users[i];
-                if (user.UserLogIDs.Count == 0)
-                {
-                    message = $"{user.UserName} จองไม่สำเร็จค่ะ";
-                    _smsManager.SendSMS(user.Mobile, message);
-                    continue;
-                }
-                if (user.UserLogNames.Contains("Already RS Today"))
-                {
-                    message = $"{user.UserName} ได้มีการจองล็อคแล้วค่ะ";
-                    _smsManager.SendSMS(user.Mobile, message);
-                    continue;
-                }
-                string userLogIDsString = $"{user.UserName} ได้จองล็อค {string.Join(",", user.UserLogNames)} สำเร็จค่ะ";
-                message = userLogIDsString;
-                _smsManager.SendSMS(user.Mobile, message);
-            }
-            return new OkResult();
-        }
-        else if (tempFileName == "TempSummaryUser")
-        {
-            var users = ExcelManager.LoadUsersFromSummaryTemp(tempFile);
-            for (int i = 0; i < users.Count; i++)
-            {
-                var user = users[i];
-                message = user.Message;
-                _smsManager.SendSMS(user.Mobile, message);
-            }
-            return new OkResult();
-        }
-        return Content("Can't send sms");
-    }
+    #endregion
+
+
+
+
+
 }

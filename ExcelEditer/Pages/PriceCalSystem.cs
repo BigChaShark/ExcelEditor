@@ -20,7 +20,10 @@ namespace ExcelEditor.Pages
         {
             var db = new SaveoneKoratMarketContext();
             if (user.ElectricityQty == 0)
+            {
+                GetElectricID(1, 1, user);
                 return 0;
+            }
             var electricityRate = db.ReservationLogeElectricityTypes
                 .Where(x => x.Description.Contains(user.ElectricityQty.ToString()))
                 .FirstOrDefault();
@@ -35,7 +38,11 @@ namespace ExcelEditor.Pages
         {
             var db = new SaveoneKoratMarketContext();
             if (user.ElectronicQty == 0)
+            {
+                GetElectricID(2, 1, user);
                 return 0;
+            }
+               
             var electronicRate = db.ReservationLogeElectronicTypes
                 .Where(x => x.Description.Contains(user.ElectronicQty.ToString()))
                 .FirstOrDefault();
