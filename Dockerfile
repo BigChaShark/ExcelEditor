@@ -1,18 +1,17 @@
+# ===== Build Stage =====
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# คัดลอกไฟล์ solution และ project
+# Copy .sln และ .csproj ก่อน แล้ว restore
 COPY ExcelEditor.sln ./
-COPY ExcelEditer/*.csproj ./ExcelEditer/
-
-# รัน restore
+COPY ExcelEditer/ExcelEditor.csproj ./ExcelEditer/
 RUN dotnet restore "ExcelEditor.sln"
 
-# คัดลอกไฟล์ทั้งหมดแล้ว build
+# Copy โค้ดทั้งหมดแล้ว build
 COPY . ./
-RUN dotnet publish "ExcelEditer/ExcelEditer.csproj" -c Release -o /app
+RUN dotnet publish "ExcelEditer/ExcelEditor.csproj" -c Release -o /app
 
-# สร้าง runtime image
+# ===== Runtime Stage =====
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 COPY --from=build /app .
