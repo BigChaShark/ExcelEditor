@@ -202,8 +202,7 @@
               "RelativeToolTip": "ExcelEditer\\Program.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-17T06:08:29.379Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-04-17T06:08:29.379Z"
             },
             {
               "$type": "Document",
@@ -237,7 +236,7 @@
               "RelativeDocumentMoniker": "ExcelEditer\\appsettings.json",
               "ToolTip": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\appsettings.json",
               "RelativeToolTip": "ExcelEditer\\appsettings.json",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAACBAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAaAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
               "WhenOpened": "2025-04-17T06:06:47.165Z",
               "EditorCaption": ""
