@@ -12,27 +12,57 @@ using ExcelEditor.Models;
 using static IndexModel;
 using System.Text.RegularExpressions;
 using ExcelEditor.Pages;
+using Microsoft.Extensions.FileSystemGlobbing;
+using Newtonsoft.Json;
+using static ExcelEditor.Pages.SMSManager;
 
 public class IndexModel : PageModel
 {
+    private readonly SMSManager _smsManager;
+
+    public IndexModel(SMSManager smsManager)
+    {
+        _smsManager = smsManager;
+    }
     [BindProperty]
     public IFormFile UploadedFile { get; set; }
+    public IFormFile UploadedSummaryFile { get; set; }
+    public IFormFile UploadedTransectionFile { get; set; }
 
     public bool ShowDownloadButton { get; set; } = false;
+    public bool ShowSummaryButton { get; set; } = false;
+    public bool ShowTransectionButton { get; set; } = false;
+
     public class UserModel
     {
-        public string? UserID { get; set; }
+        public string? UserOfflineID { get; set; }
         public string Mobile { get; set; }
         public string? UserName { get; set; }
-        public int LogNum { get; set; }
+        public int? LogNum { get; set; }
         public int SubZone { get; set; }
         public int Zone { get; set; }
         public int? UserStatus { get; set; } = 0;
         public int SheetIndex { get; set; } = 0;
+        public int FullLogeQty { get; set; } = 0;
+        public int ElectricityQty { get; set; } = 0;
+        public int ElectronicQty { get; set; } = 0;
+        public int ElectricityID { get; set; } = 0;
+        public int ElectronicID { get; set; } = 0;
+        public decimal ElectronicAmount { get; set; } = 0;
+        public decimal ElectricityAmount { get; set; } = 0;
+        public decimal LogeAmount { get; set; } = 0;
+        public decimal TotalAmount { get; set; } = 0;
         public List<int> UserLogIDs { get; set; } = new List<int>();
         public List<string> UserLogNames { get; set; } = new List<string>();
         public DateOnly CreatDate { get; set; } = DateOnly.FromDateTime(DateTime.Now);
         public DateTime CreatDateTime { get; set; } = DateTime.Now;
+    }
+
+    public class UserSummaryModel
+    {
+        public string UserName { get; set; }
+        public string Mobile { get; set; }
+        public string Message {get; set;}
     }
 
     public class LogeModel
@@ -87,7 +117,7 @@ public class IndexModel : PageModel
                                       || x.Loge.LogeGroup.SubZoneId == 38 || x.Loge.LogeGroup.SubZoneId == 2
                                       || x.Loge.LogeGroup.SubZoneId == 3  || x.Loge.LogeGroup.SubZoneId == 4
                                       || x.Loge.LogeGroup.SubZoneId == 5  || x.Loge.LogeGroup.SubZoneId == 21
-                                      || x.Loge.LogeGroup.SubZoneId == 22 || x.Loge.LogeGroup.SubZoneId == 41
+                                      || x.Loge.LogeGroup.SubZoneId == 34 || x.Loge.LogeGroup.SubZoneId == 41
                                       || x.Loge.LogeGroup.SubZoneId == 7  || x.Loge.LogeGroup.SubZoneId == 16
                                       || x.Loge.LogeGroup.SubZoneId == 48 || x.Loge.LogeGroup.SubZoneId == 43
                               /**/    || x.Loge.LogeGroup.SubZoneId == 45 || x.Loge.LogeGroup.SubZoneId == 46
@@ -132,8 +162,39 @@ public class IndexModel : PageModel
             }
         }
     }
-   
 
+    #region Upload Files
+    public async Task<IActionResult> OnPostUploadSummaryAsync()
+    {
+        ShowSummaryButton = false;
+        if (UploadedSummaryFile == null || UploadedSummaryFile.Length == 0)
+        {
+            ModelState.AddModelError("UploadedSummaryFile", "Please upload a valid summary file.");
+            return Page();
+        }
+        var summaryUsers = ExcelManager.ReadUploadedSummary(UploadedSummaryFile);
+        var usersTemp = TempFileManager.SaveSummaryUsersToTempFile(summaryUsers);
+        TempData["TempSummaryUser"] = usersTemp;
+        ShowSummaryButton = true;
+        return Page();
+    }
+    public async Task<IActionResult> OnPostUploadTransectionAsync()
+    {
+        ShowTransectionButton = false;
+        if (UploadedTransectionFile == null || UploadedTransectionFile.Length == 0)
+        {
+            ModelState.AddModelError("UploadedTransectionFile", "Please upload a valid Transection file.");
+            return Page();
+        }
+        var tran = ExcelManager.ReadUploadedTransection(UploadedTransectionFile);
+        var usersTemp = TempFileManager.SaveUsersToTempFile(tran);
+        TempData["TempTransUser"] = usersTemp;
+        ShowTransectionButton = true;
+        return Page();
+    }
+    #endregion
+
+    #region Main Action
     public async Task<IActionResult> OnPostProcessExcelAsync()
     {
         ShowDownloadButton = false;
@@ -166,21 +227,88 @@ public class IndexModel : PageModel
         }
 
         BookingSystem bookingSystem = new BookingSystem();
-        var users = ReadUsersFromExcel(originalFilePath);
+        var users = ExcelManager.ReadUsersFromExcel(originalFilePath);
         bookingSystem.ReserveLogs(users);
         bookingSystem.ShowAllUsers(users);
         bookingSystem.ShowAllAvailableLogs();
-        bookingSystem.UpdateDB(users);
-
-        FillUserLogIDsFromLogStore(originalFilePath, users);
-
+        //bookingSystem.UpdateDB(users);
+        var usersTemp = TempFileManager.SaveUsersToTempFile(users);
+        ExcelManager.FillUserLogIDsFromLogStore(originalFilePath, users);
         HttpContext.Session.SetString("FilePath", originalFilePath);
         TempData["FilePath"] = originalFilePath;
+        TempData["TempUserFile"] = usersTemp;
         TempData["Success"] = true;
         ShowDownloadButton = true;
 
         return Page();
     }
+    public IActionResult OnPostSentTransection(string tempFile)
+    {
+        var users = TempFileManager.LoadUsersFromTempFile(tempFile);
+        if (users == null || users.Count == 0)
+        {
+            return BadRequest("No users found in the temp file.");
+        }
+        foreach (var user in users)
+        {
+            foreach (var log in user.UserLogIDs)
+            {
+                Console.WriteLine(log);
+            }
+        }
+        BookingSystem bookingSystem = new BookingSystem();
+        bookingSystem.UpdateDB(users);
+        foreach (var user in users)
+        {
+            ReservationManager.createReservationLoge(user);
+            //ReservationManager.createReservationLogeDetail(user);
+            TransactionManager.createTransactionId(user);
+        }
+        return Page();
+    }
+    public IActionResult OnPostSendSMS(string tempFile, string tempFileName)
+    {
+        string message = "";
+        if (tempFileName == "TempUserFile")
+        {
+            var users = TempFileManager.LoadUsersFromTempFile(tempFile);
+            for (int i = 0; i < users.Count; i++)
+            {
+                var user = users[i];
+                if (user.UserLogIDs.Count == 0)
+                {
+                    message = $"{user.UserName} จองไม่สำเร็จค่ะ";
+                    _smsManager.SendSMS(user.Mobile, message);
+                    continue;
+                }
+                if (user.UserLogNames.Contains("Already RS Today"))
+                {
+                    message = $"{user.UserName} ได้มีการจองล็อคแล้วค่ะ";
+                    _smsManager.SendSMS(user.Mobile, message);
+                    continue;
+                }
+                string userLogIDsString = $"{user.UserName} ได้จองล็อค {string.Join(",", user.UserLogNames)} สำเร็จค่ะ";
+                message = userLogIDsString;
+                _smsManager.SendSMS(user.Mobile, message);
+            }
+            return new OkResult();
+        }
+        else if (tempFileName == "TempSummaryUser")
+        {
+            var users = TempFileManager.LoadUsersFromSummaryTemp(tempFile);
+            for (int i = 0; i < users.Count; i++)
+            {
+                var user = users[i];
+                message = user.Message;
+                _smsManager.SendSMS(user.Mobile, message);
+            }
+            return new OkResult();
+        }
+        return Content("Can't send sms");
+    }
+    #endregion
+
+    #region Download Files
     public IActionResult OnGetDownloadFile()
     {
         var filePath = HttpContext.Session.GetString("FilePath");
@@ -192,112 +320,48 @@ public class IndexModel : PageModel
         var fileName = Path.GetFileName(filePath);
         return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
     }
-    public List<UserModel> ReadUsersFromExcel(string filePath)
+
+    public IActionResult OnPostDownloadSummaryExcel(string tempFileName)
     {
-        DateTime currentDate = DateTime.Now;
-        var db = new SaveoneKoratMarketContext();
-        var usersTemp = db.UserOfflines.Where(x => x.CreateDate == DateOnly.FromDateTime(currentDate)).Select(x => new {x.UserOfflineId,x.Status}).ToList();
-        var users = new List<UserModel>();
-        ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-        using (var package = new ExcelPackage(new FileInfo(filePath)))
+        var users = TempFileManager.LoadUsersFromTempFile(tempFileName);
+
+        using (var package = new ExcelPackage())
         {
-            var allWorksheets = package.Workbook.Worksheets.ToList();
-            //var selectedWorksheets = allWorksheets.Skip(1);
+            var worksheet = package.Workbook.Worksheets.Add("User Summary");
 
-            //foreach (var sheet in allWorksheets)
-            //{
-            //    int rowCount = sheet.Dimension.Rows;
+            worksheet.Cells[1, 1].Value = "ลำดับ";
+            worksheet.Cells[1, 2].Value = "UserName";
+            worksheet.Cells[1, 3].Value = "UserMobile";
+            worksheet.Cells[1, 4].Value = "UserLoge";
 
-            //    for (int row = 2; row <= rowCount; row++)
-            //    {
-            //        if (string.IsNullOrEmpty(sheet.Cells[row, 3].Text))
-            //            continue;
-            //        var user = new UserModel();
-            //        int zoneID = GetLogZone.GetLogzone(sheet.Cells[row, 4].Text);
-            //        int marketID = GetLogZone.GetMarketZone(sheet.Cells[row, 4].Text);
-            //        user.UserID = sheet.Cells[row, 3].Text + marketID;
-            //        user.zone = zoneID;
-            //        if (int.TryParse(sheet.Cells[row, 5].Text, out int logNum))
-            //            user.LogNum = logNum;
-            //        users.Add(user);
-            //    }
-            //}
-            for (int sheetIndex = 0; sheetIndex < allWorksheets.Count; sheetIndex++)
+            for (int i = 0; i < users.Count; i++)
             {
-                var sheet = allWorksheets[sheetIndex];
-                int rowCount = sheet.Dimension.Rows;
-
-                for (int row = 2; row <= rowCount; row++)
+                var user = users[i];
+                worksheet.Cells[i + 2, 1].Value = i + 1;
+                worksheet.Cells[i + 2, 2].Value = user.UserName;
+                worksheet.Cells[i + 2, 3].Value = user.Mobile;
+                if (user.UserLogIDs.Count == 0)
                 {
-                    if (string.IsNullOrEmpty(sheet.Cells[row, 3].Text) || string.IsNullOrEmpty(sheet.Cells[row, 4].Text))
-                        continue;
-                    var user = new UserModel();
-                    int subZoneID = GetLogZone.GetLogzone(sheet.Cells[row, 4].Text);
-                    int zoneID = GetLogZone.GetMarketZone(sheet.Cells[row, 4].Text);
-                    var matchInDB = usersTemp.FirstOrDefault(x => x.UserOfflineId == sheet.Cells[row, 3].Text + zoneID);
-                    if (matchInDB != null && matchInDB.Status == 1 )
-                    {
-                        user.UserStatus = matchInDB.Status;
-                        user.UserLogNames.Add("Already RS Today");
-                        user.UserLogIDs.Add(0);
-                    }
-                    else
-                    {
-                        user.UserStatus = 0;
-                    }
-                    var matchInSheet = users.FirstOrDefault(x => x.UserID == sheet.Cells[row, 3].Text + zoneID);
-                    if (matchInSheet != null)
-                    {
-                        continue;
-                    }
-                    user.UserID = sheet.Cells[row, 3].Text + zoneID;
-                    user.Mobile = sheet.Cells[row, 3].Text;
-                    user.Zone = zoneID;
-                    user.SubZone = subZoneID;
-                    user.UserName = sheet.Cells[row, 2].Text;
-                    user.SheetIndex = sheetIndex + 1; // เริ่มจาก 1 แทน 0
-                    user.CreatDate = DateOnly.FromDateTime(currentDate);
-                    user.CreatDateTime = currentDate;
-                    if (int.TryParse(sheet.Cells[row, 5].Text, out int logNum))
-                        user.LogNum = logNum;
-
-                    users.Add(user);
+                    worksheet.Cells[i + 2, 4].Value = $"{user.UserName} จองไม่สำเร็จค่ะ";
+                    continue;
                 }
+                if (user.UserLogNames.Contains("Already RS Today"))
+                {
+                    worksheet.Cells[i + 2, 4].Value = $"{user.UserName} ได้มีการจองล็อคแล้วค่ะ";
+                    continue;
+                }
+                string userLogIDsString = $"{user.UserName} ได้จองล็อค {string.Join(",", user.UserLogNames)} สำเร็จค่ะ";
+                worksheet.Cells[i + 2, 4].Value = userLogIDsString;
             }
 
-        }
-
-        return users;
-    }
-    public void FillUserLogIDsFromLogStore(string filePath, List<UserModel> x)
-    {
-        OfficeOpenXml.ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
-
-        using (var package = new ExcelPackage(new FileInfo(filePath)))
-        {
-            var allWorksheets = package.Workbook.Worksheets.ToList();
-
-            foreach (var sheet in allWorksheets)
-            {
-                var rowCount = sheet.Dimension.Rows;
-                for (int row = 2; row <= rowCount; row++)
-                {
-                    if (string.IsNullOrEmpty(sheet.Cells[row, 3].Text))
-                        continue;
-                    int marketID = GetLogZone.GetMarketZone(sheet.Cells[row, 4].Text);
-                    string id = sheet.Cells[row, 3].Text + marketID;
-
-                    var matched = x.FirstOrDefault(x => x.UserID == id);
-
-                    if (matched != null && matched.UserLogIDs.Any())
-                    {
-                        string userLogIDsString = string.Join(",", matched.UserLogNames);
-                        sheet.Cells[row, 8].Value = userLogIDsString; // เติมใน column 8
-                    }
-                }
-            }
-            package.Save(); 
+            var stream = new MemoryStream(package.GetAsByteArray());
+            return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "UserSummary.xlsx");
         }
     }
-    
+    #endregion
+
+
+
+
+
 }

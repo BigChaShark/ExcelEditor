@@ -16,6 +16,7 @@ using static IndexModel;
 using System.Text.RegularExpressions;
 using ExcelEditor.Pages;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Linq.Expressions;
 
 namespace ExcelEditor.Pages
 {
@@ -23,14 +24,6 @@ namespace ExcelEditor.Pages
     {
         private List<LogeModel> logeMain = new List<LogeModel>();
         private int totalRows;
-        private Dictionary<int, int> currentRows = new Dictionary<int, int>
-        {
-            { 43, 1 },
-            { 45, 1 },
-            { 46, 1 },
-            { 49, 1 },
-            { 50, 1 }
-        };
         public BookingSystem()
         {
             DateTime currentDate = DateTime.Now;
@@ -127,17 +120,22 @@ namespace ExcelEditor.Pages
                 //Console.WriteLine($"Now Index : {indexNow.LogeIndex}");
                 //currentRow = logeMain.Where(m => m.IsReserve == 0 && m.LogeZone == user.zone).OrderBy(m => m.LogeIndex).Select(m => m.Row).FirstOrDefault();
                 currentRow = indexNow != null ? indexNow.Row : 1;
-                if (ReserveLogsForUserInRow(user, user.LogNum, currentRow, user.SubZone))
+                if (ReserveLogsForUserInRow(user, currentRow))
                 {
                     //currentRow += 1;
                     //SetRow(user.zone);
                 }
                 else
                 {
+                    if (indexNow == null)
+                    {
+                        Console.WriteLine($"UserID {user.UserOfflineID} No available loge");
+                        continue;
+                    }
                     for (int i = indexNow.LogeIndex; i <= totalRows; i++)
                     {
                         currentRow = logeMain.Where(m => m.IsReserve == 0 && m.LogeZone == user.SubZone && m.LogeIndex == i).Select(m => m.Row).FirstOrDefault();
-                        if (ReserveLogsForUserInRow(user, user.LogNum, currentRow, user.SubZone))
+                        if (ReserveLogsForUserInRow(user, currentRow))
                         {
                             //currentRow += 1;
                             //SetRow(user.zone);
@@ -171,31 +169,78 @@ namespace ExcelEditor.Pages
             //}
         }
 
-        private bool ReserveLogsForUserInRow(UserModel user, int logCount, int row, int zone)
+        private bool ReserveLogsForUserInRow(UserModel user, int row)
         {
-            if (logCount < 1 || logCount > 3)
+            switch (user.Zone)
             {
-                Console.WriteLine($"UserID {user.UserID} Must <= 3 log");
-                return false;
+                case 3:
+                case 5:
+                    if (user.LogNum < 1 || user.LogNum > 5)
+                    {
+                        Console.WriteLine($"UserID {user.UserOfflineID} loge Error");
+                        return false;
+                    }
+                break;
+                case 0:
+                    Console.WriteLine($"UserID {user.UserOfflineID} loge Error");
+                    return false;
+                default:
+                    if (user.LogNum < 1 || user.LogNum > 3)
+                    {
+                        Console.WriteLine($"UserID {user.UserOfflineID} loge Error");
+                        return false;
+                    }
+                    break;
+
+                    /*case 7 :  
+                 var availableLogs = logeMain
+                .Where(m => m.IsReserve == 0 && m.LogeZone == user.SubZone)
+                .Select(m => m.LogeIndex)
+                .ToList(); เอา ล็อค index เช็คไม่ได้ใช้ ID 
+                    
+                    และ ถ้าเป็นเคส 7 อาจจะต้องมีการเช็คว่า logCount == 2 ต้อง เริ่มเลขขี้ 1/4 ได้หมด และ ต้องแก้ avilablelogs ให้สอดคล้องกับ การจองของ MU ด้วยการเอา Row ออก
+                */
             }
-            var availableLogs = logeMain
-                .Where(m => m.IsReserve == 0 && m.Row == row && m.LogeZone == zone)
+            var availableLogs = new List<int>();
+            if (user.SubZone==7)
+            {
+               availableLogs = logeMain
+               .Where(m => m.IsReserve == 0 && m.LogeZone == user.SubZone).OrderBy(m => m.LogeIndex)
+               .Select(m => m.LogeIndex)
+               .ToList();
+            }
+            else
+            {
+                availableLogs = logeMain
+                .Where(m => m.IsReserve == 0 && m.Row == row && m.LogeZone == user.SubZone)
                 .Select(m => m.LogeID)
                 .ToList();
+            }
+
+            
             if (availableLogs.Count > 0)
             {
-                var selectedLogs = GetFirstConsecutiveLogs(availableLogs, logCount, user.SubZone);
+                var selectedLogs = GetFirstConsecutiveLogs(availableLogs, user.LogNum, user.SubZone);
                 if (selectedLogs != null)
                 {
-                    var names = logeMain.Where(m => selectedLogs.Contains(m.LogeID) && m.Row == row).Select(m => m.LogeName).ToList();
+                    var names = new List<string>();
+                    if (user.SubZone == 7)
+                    {
+                        names = logeMain.Where(m => selectedLogs.Contains(m.LogeIndex) && m.LogeZone == user.SubZone).OrderBy(o => o.LogeIndex).Select(m => m.LogeName).ToList();
+                    }
+                    else
+                    {
+                        names = logeMain.Where(m => selectedLogs.Contains(m.LogeID) && m.Row == row).Select(m => m.LogeName).ToList();
+                    }
                     user.UserLogIDs.AddRange(selectedLogs);
                     user.UserLogNames.AddRange(names);
-                    MarkLogeAsReserved(selectedLogs);
+                    MarkLogeAsReserved(selectedLogs,user.SubZone);
+                    PriceCalSystem.TotalPrice(user);
                     user.UserStatus = 1;
-                    Console.WriteLine($"UserID {user.UserID} RS {logCount} log SUC...: {string.Join(", ", names)}");
+                    Console.WriteLine($"UserID {user.UserOfflineID} RS {user.LogNum} log SUC...: {string.Join(", ", names)}");
                     return true;
                 }
-                Console.WriteLine($"UserID {user.UserID} Can't RS on Row {row}");
+                Console.WriteLine($"UserID {user.UserOfflineID} Can't RS on Row {row}");
                 return false;
             }
             else
@@ -204,17 +249,39 @@ namespace ExcelEditor.Pages
             }
 
         }
-        private List<int> GetFirstConsecutiveLogs(List<int> availableLogs, int logCount, int zone)
+        private List<int> GetFirstConsecutiveLogs(List<int> availableLogs, int? logCount, int zone)
         {
-            for (int i = 0; i <= availableLogs.Count - logCount; i++)
+            if (zone==7)
             {
-                var subset = availableLogs.Skip(i).Take(logCount).ToList();
-                if (subset.Count == logCount && IsConsecutive(subset) && CountCornerLogs(subset) <= 1)
+                for (int i = 0; i <= availableLogs.Count - logCount; i++)
                 {
-                    return subset;
+                    if (logCount==2 && availableLogs[i] % 2 == 0)
+                    {
+                        continue;
+                    }
+                    var subset = availableLogs.Skip(i).Take((int)logCount).ToList();
+                    if (subset.Count == logCount && IsConsecutive(subset))
+                    {
+                        return subset;
+                    }
                 }
+                return null;
+            }
+            else
+            {
+                for (int i = 0; i <= availableLogs.Count - logCount; i++)
+                {
+                    var subset = availableLogs.Skip(i).Take((int)logCount).ToList();
+                    if (subset.Count == logCount && IsConsecutive(subset) && CountCornerLogs(subset) <= 1)
+                    {
+                        return subset;
+                    }
+                }
+                return null;
             }
             return null;
+            /* ของ Case 7 ถ้า logCount == 2 ต้อง เริ่มเลขขี้ 1/4 ได้หมด */
+
         }
 
         private bool IsConsecutive(List<int> logIDs)
@@ -232,17 +299,24 @@ namespace ExcelEditor.Pages
             return logIDs.Count(logID => logeMain.First(m => m.LogeID == logID).IsCorner);
         }
 
-        private void MarkLogeAsReserved(List<int> logIDs)
+        private void MarkLogeAsReserved(List<int> logIDs , int zone)
         {
             foreach (var logID in logIDs)
             {
-                logeMain.First(m => m.LogeID == logID).IsReserve = 1;
+                if(zone == 7)
+                {
+                    logeMain.First(m => m.LogeIndex == logID && m.LogeZone == zone).IsReserve = 1;
+                }
+                else {
+                    logeMain.First(m => m.LogeID == logID).IsReserve = 1;
+                }
+                    
             }
         }
         public void UpdateDB(List<UserModel> users)
         {
             UpdateLoges();
-            UpdateUsers(users);
+            UpdateUserOffline(users);
         }
         public void UpdateLoges()
         {
@@ -259,7 +333,7 @@ namespace ExcelEditor.Pages
                 db.SaveChanges();
             }
         }
-        public void UpdateUsers(List<UserModel> users)
+        public void UpdateUserOffline(List<UserModel> users)
         {
             using (var db = new SaveoneKoratMarketContext())
             {
@@ -268,20 +342,24 @@ namespace ExcelEditor.Pages
                 var userToAdd = new List<UserOffline>();
                 foreach (var user in users)
                 {
-                    var isSame = userCurrent.FirstOrDefault(x => (x.UserOfflineId == user.UserID));
+                    var isSame = userCurrent.FirstOrDefault(x => (x.UserOfflineId == user.UserOfflineID));
                     if (isSame == null)
                     {
                         var userOffline = new UserOffline
                         {
-                            UserOfflineId = user.UserID,
+                            UserOfflineId = user.UserOfflineID,
                             Name = user.UserName,
                             Mobile = user.Mobile,
-                            Status = user.UserStatus,
-                            LogeQty = user.LogNum,
+                            Status = (int)user.UserStatus,
+                            LogeQty = (int)user.LogNum,
                             ZoneId = user.Zone,
                             SubZoneId = user.SubZone,
                             LogeName = string.Join(", ", user.UserLogNames),
                             LogeId = string.Join(", ", user.UserLogIDs),
+                            LogeAmount = user.LogeAmount,
+                            ElectricityAmount = user.ElectricityAmount,
+                            ElectronicAmount = user.ElectronicAmount,
+                            TotalAmount = user.TotalAmount,
                             CreateDate = DateOnly.FromDateTime(currentDate),
                             CreateDateTime = currentDate,
                             CreateBy = 113,
@@ -292,8 +370,8 @@ namespace ExcelEditor.Pages
                     {
                         if (isSame.Status == 0)
                         {
-                            isSame.Status = user.UserStatus;
-                            isSame.LogeQty = user.LogNum;
+                            isSame.Status = (int)user.UserStatus;
+                            isSame.LogeQty = (int)user.LogNum;
                             isSame.ZoneId = user.Zone;
                             isSame.SubZoneId = user.SubZone;
                             isSame.LogeName = string.Join(", ", user.UserLogNames);

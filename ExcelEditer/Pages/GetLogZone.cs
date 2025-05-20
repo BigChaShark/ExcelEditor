@@ -3,16 +3,16 @@
     public static class GetLogZone
     {
         public static int GetLogzone(string name) =>
-                    name.Contains("U1-Z2") ? 1 :
-                    name.Contains("S1-T2") ? 6 :
-                    name.Contains("A1-B2") ? 38 :
-                    name.Contains("TA-TC") ? 2 :
-                    name.Contains("TD-TN") ? 3 :
-                    name.Contains("TDS-TGS") ? 4 :
-                    name.Contains("TAL-TCL") ? 5 :
-                    name.Contains("TH-TJ") ? 21 :
-                    name.Contains("TYF-TZF") ? 22 :
-                    name.Contains("TV-TZ") ? 41 :
+                    name.Contains("UWXYZ") ? 1 :
+                    name.Contains("ST") ? 6 :
+                    name.Contains("AB") ? 38 :
+                    name.Contains("7-11") ? 2 :
+                    name.Contains("วะวาบ") ? 3 :
+                    name.Contains("บนถนน") ? 4 :
+                    name.Contains("Lotus") ? 5 :
+                    name.Contains("กลางเดิ่น") ? 21 :
+                    name.Contains("MC") ? 34 :
+                    name.Contains("หลังคาสูง") ? 41 :
                     name.Contains("MU") ? 7 :
                     name.Contains("MS") ? 16 :
                     name.Contains("MA-MB") ? 48 :
@@ -28,19 +28,19 @@
                     name.Contains("GW-GZ") ? 1 :
                     name.Contains("R01B-R01S") ? 2 :
                     name.Contains("R01A") ? 2 :
-                    name.Contains("U1-Z2") ? 3 :
-                    name.Contains("S1-T2") ? 3 :
-                    name.Contains("A1-B2") ? 3 :
-                    name.Contains("TA-TC") ? 4 :
-                    name.Contains("TD-TN") ? 4 :
-                    name.Contains("TDS-TGS") ? 4 :
-                    name.Contains("TAL-TCL") ? 4 :
-                    name.Contains("TH-TJ") ? 4 :
-                    name.Contains("TYF-TZF") ? 4 :
-                    name.Contains("TV-TZ") ? 4 :
+                    name.Contains("UWXYZ") ? 3 :
+                    name.Contains("ST") ? 3 :
+                    name.Contains("AB") ? 3 :
+                    name.Contains("7-11") ? 4 :
+                    name.Contains("วะวาบ") ? 4 :
+                    name.Contains("บนถนน") ? 4 :
+                    name.Contains("Lotus") ? 4 :
+                    name.Contains("กลางเดิ่น") ? 4 :
+                    name.Contains("หลังคาสูง") ? 4 :
                     name.Contains("MU") ? 5 :
                     name.Contains("MS") ? 5 :
-                    name.Contains("MA-MB") ? 5 : 0;
+                    name.Contains("MA-MB") ? 5 :
+                    name.Contains("MC") ? 5 : 0;
     }
     
  }

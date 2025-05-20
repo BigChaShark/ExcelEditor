@@ -230,4 +230,8 @@ public partial class Member
     public int? IsBkk { get; set; }
 
     public long? LastUpdateBy { get; set; }
+
+    public virtual ICollection<ReservationLoge> ReservationLoges { get; set; } = new List<ReservationLoge>();
+
+    public virtual ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
 }

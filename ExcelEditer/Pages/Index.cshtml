@@ -4,16 +4,12 @@
     ViewData["Title"] = "Upload File";
 }
 
-<h2>Upload File</h2>
+<h2>จองล็อค</h2>
 
 <form method="post" enctype="multipart/form-data">
-    <input type="file" asp-for="UploadedFile" />
+    <input type="file" asp-for="UploadedFile" id="main-file" />
     <button type="submit" asp-page-handler="ProcessExcel">Upload & Process</button>
 </form>
-
-@* <form method="post"> *@
-@*     <button type="submit">Test DB</button> *@
-@* </form> *@
 
 @if (Model.UploadedFile != null)
 {
@@ -21,13 +17,69 @@
 }
 @if (Model.ShowDownloadButton)
 {
-    <div class="mt-3" id="download-button-container">
+    <div id="download-button-all" style="display: flex; gap: 10px; flex-wrap: wrap;">
         <a asp-page-handler="DownloadFile" class="btn btn-success">Download Processed File</a>
+        <form method="post" asp-page-handler="DownloadSummaryExcel">
+            <input type="hidden" name="tempFileName" value="@TempData["TempUserFile"]" />
+            <button type="submit" class="btn btn-primary">Download User Summary</button>
+        </form>
+        <form method="post" asp-page-handler="SendSMS" id="send-sms-form">
+            <input type="hidden" name="tempFile" value="@TempData["TempUserFile"]" />
+            <input type="hidden" name="tempFileName" value="TempUserFile" />
+            <button type="submit" class="btn btn-secondary" >Send SMS</button>
+        </form>
     </div>
 }
+
+<hr style="border-top: 5px solid Gray; margin: 20px 0;" />
+
+<h2>สร้าง Transection</h2>
+<form method="post" enctype="multipart/form-data" asp-page-handler="UploadTransection">
+    <input type="file" asp-for="UploadedTransectionFile" id="transection-file" />
+    <button type="submit">Upload & Process</button>
+</form>
+@if (Model.UploadedTransectionFile != null)
+{
+    <p id="upload-success-msg">File uploaded successfully: @Model.UploadedTransectionFile.FileName</p>
+}
+@if (Model.ShowTransectionButton)
+{
+    <div id="tran-button" style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <form method="post" asp-page-handler="SentTransection" id="send-tran-form">
+            <input type="hidden" name="tempFile" value="@TempData["TempTransUser"]" />
+            <button type="submit" class="btn btn-secondary">Create Transection</button>
+        </form>
+    </div>
+
+}
+
+<hr style="border-top: 5px solid Gray; margin: 20px 0;" />
+
+<h2>ส่ง SMS</h2>
+<form method="post" enctype="multipart/form-data" asp-page-handler="UploadSummary">
+    <input type="file" asp-for="UploadedSummaryFile" id="summary-file" />
+    <button type="submit">Upload & Process</button>
+</form>
+@if (Model.UploadedSummaryFile != null)
+{
+    <p id="upload-success-msg">File uploaded successfully: @Model.UploadedSummaryFile.FileName</p>
+}
+@if (Model.ShowSummaryButton)
+{
+    <div id="sms-button" style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <form method="post" asp-page-handler="SendSMS" id="send-sms-form">
+            <input type="hidden" name="tempFile" value="@TempData["TempSummaryUser"]" />
+            <input type="hidden" name="tempFileName" value="TempSummaryUser" />
+            <button type="submit" class="btn btn-secondary">Send SMS</button>
+        </form>
+    </div>
+
+}
+
 <script>
-    document.querySelector('input[type="file"]').addEventListener('change', function () {
-        const downloadBtn = document.getElementById('download-button-container');
+    document.getElementById('main-file').addEventListener('change', function () {
+        
+        const downloadBtn = document.getElementById('download-button-all');
         if (downloadBtn) {
             downloadBtn.style.display = 'none';
         }
@@ -36,4 +88,69 @@
             successMsg.style.display = 'none';
         }
     });
+
+     document.getElementById('transection-file').addEventListener('change', function () {
+
+        const sendTranbtn = document.getElementById('tran-button');
+        if (sendTranbtn) {
+            downloadBtn.style.display = 'none';
+        }
+        
+    });
+    // document.getElementById('send-tran-form').addEventListener('submit', async function (e) {
+    //     e.preventDefault(); //ป้องกันการรีเฟรชหน้า
+
+    //     const form = e.target;
+    //     const formData = new FormData(form);
+
+    //     try {
+    //         const response = await fetch('?handler=SentTransection', {
+    //             method: 'POST',
+    //             body: formData
+    //         });
+
+    //         if (response.ok) {
+    //             const text = await response.text();
+    //             alert("Transection create successfully!");
+    //         } else {
+    //             alert("Failed to create Transection");
+    //         }
+    //     } catch (error) {
+    //         console.error("Error:", error);
+    //         alert("Error create Transection");
+    //     }
+    // });
+    document.getElementById('summary-file').addEventListener('change', function () {
+
+        const sendSMSbtn = document.getElementById('sms-button');
+        if (sendSMSbtn) {
+            downloadBtn.style.display = 'none';
+        }
+
+    });
+        document.getElementById('send-sms-form').addEventListener('submit', async function (e) {
+        e.preventDefault(); // ป้องกันการรีเฟรชหน้า
+
+        const form = e.target;
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch('?handler=SendSMS', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                const text = await response.text();
+                alert("SMS sent successfully!");
+            } else {
+                alert("Failed to send SMS");
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Error sending SMS");
+        }
+    });
+    
+   
 </script>

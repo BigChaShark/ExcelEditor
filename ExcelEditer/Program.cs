@@ -1,5 +1,6 @@
 using ExcelEditor;
 using ExcelEditor.Models;
+using ExcelEditor.Pages;
 using Microsoft.EntityFrameworkCore;
 using System;
 
@@ -8,9 +9,13 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddSession();
+builder.Services.AddTransient<SMSSetting>();
+builder.Services.AddScoped<SMSManager>();
+builder.Services.Configure<SMSSetting>(builder.Configuration.GetSection("SMSSetting"));
 
 builder.Services.AddDbContext<SaveoneKoratMarketContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 
 var app = builder.Build();
 app.UseSession();

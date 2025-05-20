@@ -21,5 +21,7 @@ public partial class Zone
 
     public virtual ICollection<LogeGroup> LogeGroups { get; set; } = new List<LogeGroup>();
 
+    public virtual ICollection<ReservationLoge> ReservationLoges { get; set; } = new List<ReservationLoge>();
+
     public virtual ICollection<SubZone> SubZones { get; set; } = new List<SubZone>();
 }
