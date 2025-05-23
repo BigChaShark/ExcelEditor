@@ -11,7 +11,7 @@ namespace ExcelEditor.Pages
             //Test 0981565947 must chk with status if == 1
             var db = new SaveoneKoratMarketContext();
             //int userId = 113; // Auto
-            int reservationLogeStatus = 2; 
+            int reservationLogeStatus = 2;
             int zoneId = member.Zone;
             int subZoneId = member.SubZone;
             int[] zone = { 43, 45 , 46 , 49 , 50 };

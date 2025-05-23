@@ -11,8 +11,8 @@
       "RelativeMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|solutionrelative:excelediter\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|c:\\users\\anuch\\source\\repos\\excelediter\\excelediter\\pages\\transactionmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|solutionrelative:excelediter\\pages\\transactionmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|c:\\users\\anuch\\source\\repos\\excelediter\\excelediter\\pages\\bookingsystem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|solutionrelative:excelediter\\pages\\bookingsystem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|c:\\users\\anuch\\source\\repos\\excelediter\\excelediter\\pages\\index.cshtml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -23,48 +23,56 @@
       "RelativeMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|solutionrelative:excelediter\\pages\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|c:\\users\\anuch\\source\\repos\\excelediter\\excelediter\\exceleditor.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|",
-      "RelativeMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|solutionrelative:excelediter\\exceleditor.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|"
+      "AbsoluteMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|c:\\users\\anuch\\source\\repos\\excelediter\\excelediter\\pages\\excelmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|solutionrelative:excelediter\\pages\\excelmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|c:\\users\\anuch\\source\\repos\\excelediter\\excelediter\\dockerfile||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|solutionrelative:excelediter\\dockerfile||{8B382828-6202-11D1-8870-0000F87579D2}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|c:\\users\\anuch\\source\\repos\\excelediter\\excelediter\\pages\\bookingsystem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|solutionrelative:excelediter\\pages\\bookingsystem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|c:\\users\\anuch\\source\\repos\\excelediter\\excelediter\\pages\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|solutionrelative:excelediter\\pages\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|c:\\users\\anuch\\source\\repos\\excelediter\\excelediter\\pages\\_viewimports.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|solutionrelative:excelediter\\pages\\_viewimports.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|c:\\users\\anuch\\source\\repos\\excelediter\\excelediter\\pages\\getlogzone.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|solutionrelative:excelediter\\pages\\getlogzone.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|c:\\users\\anuch\\source\\repos\\excelediter\\excelediter\\exceleditor.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|",
+      "RelativeMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|solutionrelative:excelediter\\exceleditor.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|c:\\users\\anuch\\source\\repos\\excelediter\\excelediter\\pages\\reservationmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|solutionrelative:excelediter\\pages\\reservationmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|c:\\users\\anuch\\source\\repos\\excelediter\\excelediter\\pages\\tempfilemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|solutionrelative:excelediter\\pages\\tempfilemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|c:\\users\\anuch\\source\\repos\\excelediter\\excelediter\\pages\\smssetting.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|solutionrelative:excelediter\\pages\\smssetting.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|c:\\users\\anuch\\source\\repos\\excelediter\\excelediter\\pages\\smsmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|solutionrelative:excelediter\\pages\\smsmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|c:\\users\\anuch\\source\\repos\\excelediter\\excelediter\\pages\\privacy.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|solutionrelative:excelediter\\pages\\privacy.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|c:\\users\\anuch\\source\\repos\\excelediter\\excelediter\\pages\\pricecalsystem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|solutionrelative:excelediter\\pages\\pricecalsystem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|c:\\users\\anuch\\source\\repos\\excelediter\\excelediter\\pages\\excelmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|solutionrelative:excelediter\\pages\\excelmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|c:\\users\\anuch\\source\\repos\\excelediter\\excelediter\\pages\\smsmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|solutionrelative:excelediter\\pages\\smsmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|c:\\users\\anuch\\source\\repos\\excelediter\\excelediter\\pages\\smssetting.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|solutionrelative:excelediter\\pages\\smssetting.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|c:\\users\\anuch\\source\\repos\\excelediter\\excelediter\\pages\\reservationmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|solutionrelative:excelediter\\pages\\reservationmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|c:\\users\\anuch\\source\\repos\\excelediter\\excelediter\\pages\\transactionmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|solutionrelative:excelediter\\pages\\transactionmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|c:\\users\\anuch\\source\\repos\\excelediter\\excelediter\\pages\\tempfilemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|solutionrelative:excelediter\\pages\\tempfilemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|c:\\users\\anuch\\source\\repos\\excelediter\\excelediter\\pages\\getlogzone.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|solutionrelative:excelediter\\pages\\getlogzone.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|c:\\users\\anuch\\source\\repos\\excelediter\\excelediter\\dockerfile||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|solutionrelative:excelediter\\dockerfile||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|c:\\users\\anuch\\source\\repos\\excelediter\\excelediter\\models\\reservationlogedetail.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -77,14 +85,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|c:\\users\\anuch\\source\\repos\\excelediter\\excelediter\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
       "RelativeMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|solutionrelative:excelediter\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|c:\\users\\anuch\\source\\repos\\excelediter\\excelediter\\pages\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|solutionrelative:excelediter\\pages\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|c:\\users\\anuch\\source\\repos\\excelediter\\excelediter\\pages\\privacy.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|solutionrelative:excelediter\\pages\\privacy.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{5FA004B5-B614-438E-AD93-8E6AF203798F}|ExcelEditer\\ExcelEditor.csproj|c:\\users\\anuch\\source\\repos\\excelediter\\excelediter\\models\\saveonekoratmarketcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -130,20 +130,102 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 4,
+          "SelectedChildIndex": 9,
           "Children": [
             {
               "$type": "Document",
               "DocumentIndex": 2,
+              "Title": "BookingSystem.cs",
+              "DocumentMoniker": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\BookingSystem.cs",
+              "RelativeDocumentMoniker": "ExcelEditer\\Pages\\BookingSystem.cs",
+              "ToolTip": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\BookingSystem.cs",
+              "RelativeToolTip": "ExcelEditer\\Pages\\BookingSystem.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAASAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-28T14:15:15.511Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "PriceCalSystem.cs",
+              "DocumentMoniker": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\PriceCalSystem.cs",
+              "RelativeDocumentMoniker": "ExcelEditer\\Pages\\PriceCalSystem.cs",
+              "ToolTip": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\PriceCalSystem.cs",
+              "RelativeToolTip": "ExcelEditer\\Pages\\PriceCalSystem.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAAxAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-16T04:06:39.724Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "Privacy.cshtml",
+              "DocumentMoniker": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\Privacy.cshtml",
+              "RelativeDocumentMoniker": "ExcelEditer\\Pages\\Privacy.cshtml",
+              "ToolTip": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\Privacy.cshtml",
+              "RelativeToolTip": "ExcelEditer\\Pages\\Privacy.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-04-28T14:46:57.654Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "ExcelEditor",
+              "DocumentMoniker": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\ExcelEditor.csproj",
+              "RelativeDocumentMoniker": "ExcelEditer\\ExcelEditor.csproj",
+              "ToolTip": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\ExcelEditor.csproj",
+              "RelativeToolTip": "ExcelEditer\\ExcelEditor.csproj",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-04-17T08:03:58.5Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
               "Title": "TransactionManager.cs",
               "DocumentMoniker": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\TransactionManager.cs",
               "RelativeDocumentMoniker": "ExcelEditer\\Pages\\TransactionManager.cs",
               "ToolTip": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\TransactionManager.cs",
               "RelativeToolTip": "ExcelEditer\\Pages\\TransactionManager.cs",
-              "ViewState": "AgIAACIAAAAAAAAAAAAgwBkAAAA+AAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAqAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-15T12:40:52.058Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-05-15T12:40:52.058Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "ExcelManager.cs",
+              "DocumentMoniker": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\ExcelManager.cs",
+              "RelativeDocumentMoniker": "ExcelEditer\\Pages\\ExcelManager.cs",
+              "ToolTip": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\ExcelManager.cs",
+              "RelativeToolTip": "ExcelEditer\\Pages\\ExcelManager.cs",
+              "ViewState": "AgIAAC4AAAAAAAAAAAAgwFQAAABDAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-07T15:57:30.757Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\Index.cshtml",
+              "RelativeDocumentMoniker": "ExcelEditer\\Pages\\Index.cshtml",
+              "ToolTip": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\Index.cshtml",
+              "RelativeToolTip": "ExcelEditer\\Pages\\Index.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACcAAAAHAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-04-17T06:17:23.306Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Index.cshtml.cs",
+              "DocumentMoniker": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\Index.cshtml.cs",
+              "RelativeDocumentMoniker": "ExcelEditer\\Pages\\Index.cshtml.cs",
+              "ToolTip": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\Index.cshtml.cs",
+              "RelativeToolTip": "ExcelEditer\\Pages\\Index.cshtml.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-17T06:17:33.72Z"
             },
             {
               "$type": "Document",
@@ -155,12 +237,36 @@
               "RelativeToolTip": "ExcelEditer\\Program.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-17T06:08:29.379Z",
+              "WhenOpened": "2025-04-17T06:08:29.379Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\appsettings.json",
+              "RelativeDocumentMoniker": "ExcelEditer\\appsettings.json",
+              "ToolTip": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\appsettings.json*",
+              "RelativeToolTip": "ExcelEditer\\appsettings.json*",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAACcAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-04-17T06:06:47.165Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 6,
+              "Title": "_Layout.cshtml",
+              "DocumentMoniker": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\Shared\\_Layout.cshtml",
+              "RelativeDocumentMoniker": "ExcelEditer\\Pages\\Shared\\_Layout.cshtml",
+              "ToolTip": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\Shared\\_Layout.cshtml",
+              "RelativeToolTip": "ExcelEditer\\Pages\\Shared\\_Layout.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAGAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-04-17T08:11:38.198Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
               "Title": "_ViewImports.cshtml",
               "DocumentMoniker": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\_ViewImports.cshtml",
               "RelativeDocumentMoniker": "ExcelEditer\\Pages\\_ViewImports.cshtml",
@@ -169,104 +275,6 @@
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAWAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2025-04-17T08:08:54.629Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "Dockerfile",
-              "DocumentMoniker": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Dockerfile",
-              "RelativeDocumentMoniker": "ExcelEditer\\Dockerfile",
-              "ToolTip": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Dockerfile",
-              "RelativeToolTip": "ExcelEditer\\Dockerfile",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2025-05-20T14:55:41.509Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "appsettings.json",
-              "DocumentMoniker": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\appsettings.json",
-              "RelativeDocumentMoniker": "ExcelEditer\\appsettings.json",
-              "ToolTip": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\appsettings.json",
-              "RelativeToolTip": "ExcelEditer\\appsettings.json",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAABUAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-04-17T06:06:47.165Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
-              "Title": "GetLogZone.cs",
-              "DocumentMoniker": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\GetLogZone.cs",
-              "RelativeDocumentMoniker": "ExcelEditer\\Pages\\GetLogZone.cs",
-              "ToolTip": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\GetLogZone.cs",
-              "RelativeToolTip": "ExcelEditer\\Pages\\GetLogZone.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACYAAAAsAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-28T08:36:48.5Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "BookingSystem.cs",
-              "DocumentMoniker": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\BookingSystem.cs",
-              "RelativeDocumentMoniker": "ExcelEditer\\Pages\\BookingSystem.cs",
-              "ToolTip": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\BookingSystem.cs",
-              "RelativeToolTip": "ExcelEditer\\Pages\\BookingSystem.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAGkBAAA7AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-28T14:15:15.511Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "ExcelEditor",
-              "DocumentMoniker": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\ExcelEditor.csproj",
-              "RelativeDocumentMoniker": "ExcelEditer\\ExcelEditor.csproj",
-              "ToolTip": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\ExcelEditor.csproj",
-              "RelativeToolTip": "ExcelEditer\\ExcelEditor.csproj",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2025-04-17T08:03:58.5Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "Index.cshtml",
-              "DocumentMoniker": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\Index.cshtml",
-              "RelativeDocumentMoniker": "ExcelEditer\\Pages\\Index.cshtml",
-              "ToolTip": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\Index.cshtml",
-              "RelativeToolTip": "ExcelEditer\\Pages\\Index.cshtml",
-              "ViewState": "AgIAAAIAAAAAAAAAAAAAAAsAAAAHAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-04-17T06:17:23.306Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "Index.cshtml.cs",
-              "DocumentMoniker": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\Index.cshtml.cs",
-              "RelativeDocumentMoniker": "ExcelEditer\\Pages\\Index.cshtml.cs",
-              "ToolTip": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\Index.cshtml.cs",
-              "RelativeToolTip": "ExcelEditer\\Pages\\Index.cshtml.cs",
-              "ViewState": "AgIAACMAAAAAAAAAAAAuwFIAAAAXAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-17T06:17:33.72Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 11,
-              "Title": "TempFileManager.cs",
-              "DocumentMoniker": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\TempFileManager.cs",
-              "RelativeDocumentMoniker": "ExcelEditer\\Pages\\TempFileManager.cs",
-              "ToolTip": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\TempFileManager.cs",
-              "RelativeToolTip": "ExcelEditer\\Pages\\TempFileManager.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAFAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-18T16:58:41.035Z"
             },
             {
               "$type": "Document",
@@ -282,55 +290,67 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
-              "Title": "ReservationManager.cs",
-              "DocumentMoniker": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\ReservationManager.cs",
-              "RelativeDocumentMoniker": "ExcelEditer\\Pages\\ReservationManager.cs",
-              "ToolTip": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\ReservationManager.cs",
-              "RelativeToolTip": "ExcelEditer\\Pages\\ReservationManager.cs",
-              "ViewState": "AgIAABwAAAAAAAAAAAAgwGoAAAB6AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-17T15:33:02.729Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 11,
               "Title": "SMSManager.cs",
               "DocumentMoniker": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\SMSManager.cs",
               "RelativeDocumentMoniker": "ExcelEditer\\Pages\\SMSManager.cs",
               "ToolTip": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\SMSManager.cs",
               "RelativeToolTip": "ExcelEditer\\Pages\\SMSManager.cs",
-              "ViewState": "AgIAAGAAAAAAAAAAAAAmwDkAAAA/AAAAAAAAAA==",
+              "ViewState": "AgIAACIAAAAAAAAAAAAgwDkAAAA/AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-05-12T03:24:02.887Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
-              "Title": "PriceCalSystem.cs",
-              "DocumentMoniker": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\PriceCalSystem.cs",
-              "RelativeDocumentMoniker": "ExcelEditer\\Pages\\PriceCalSystem.cs",
-              "ToolTip": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\PriceCalSystem.cs",
-              "RelativeToolTip": "ExcelEditer\\Pages\\PriceCalSystem.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAAxAAAAAAAAAA==",
+              "DocumentIndex": 13,
+              "Title": "ReservationManager.cs",
+              "DocumentMoniker": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\ReservationManager.cs",
+              "RelativeDocumentMoniker": "ExcelEditer\\Pages\\ReservationManager.cs",
+              "ToolTip": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\ReservationManager.cs",
+              "RelativeToolTip": "ExcelEditer\\Pages\\ReservationManager.cs",
+              "ViewState": "AgIAAC4AAAAAAAAAAAAgwBEAAAAvAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-16T04:06:39.724Z"
+              "WhenOpened": "2025-05-17T15:33:02.729Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 15,
-              "Title": "ExcelManager.cs",
-              "DocumentMoniker": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\ExcelManager.cs",
-              "RelativeDocumentMoniker": "ExcelEditer\\Pages\\ExcelManager.cs",
-              "ToolTip": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\ExcelManager.cs",
-              "RelativeToolTip": "ExcelEditer\\Pages\\ExcelManager.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAgwN8AAAAAAAAAAAAAAA==",
+              "Title": "TempFileManager.cs",
+              "DocumentMoniker": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\TempFileManager.cs",
+              "RelativeDocumentMoniker": "ExcelEditer\\Pages\\TempFileManager.cs",
+              "ToolTip": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\TempFileManager.cs",
+              "RelativeToolTip": "ExcelEditer\\Pages\\TempFileManager.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-07T15:57:30.757Z"
+              "WhenOpened": "2025-05-18T16:58:41.035Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 16,
+              "Title": "GetLogZone.cs",
+              "DocumentMoniker": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\GetLogZone.cs",
+              "RelativeDocumentMoniker": "ExcelEditer\\Pages\\GetLogZone.cs",
+              "ToolTip": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\GetLogZone.cs",
+              "RelativeToolTip": "ExcelEditer\\Pages\\GetLogZone.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACYAAAAsAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-28T08:36:48.5Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "Dockerfile",
+              "DocumentMoniker": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Dockerfile",
+              "RelativeDocumentMoniker": "ExcelEditer\\Dockerfile",
+              "ToolTip": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Dockerfile",
+              "RelativeToolTip": "ExcelEditer\\Dockerfile",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-05-20T14:55:41.509Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
               "Title": "ReservationLogeDetail.cs",
               "DocumentMoniker": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Models\\ReservationLogeDetail.cs",
               "RelativeDocumentMoniker": "ExcelEditer\\Models\\ReservationLogeDetail.cs",
@@ -342,13 +362,13 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 17,
+              "DocumentIndex": 19,
               "Title": "Member.cs",
               "DocumentMoniker": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Models\\Member.cs",
               "RelativeDocumentMoniker": "ExcelEditer\\Models\\Member.cs",
               "ToolTip": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Models\\Member.cs",
               "RelativeToolTip": "ExcelEditer\\Models\\Member.cs",
-              "ViewState": "AgIAAAUAAAAAAAAAAIA6wCEAAAAZAAAAAAAAAA==",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAjwCEAAAAZAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-05-15T13:24:56.133Z"
             },
@@ -366,19 +386,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 19,
-              "Title": "_Layout.cshtml",
-              "DocumentMoniker": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\Shared\\_Layout.cshtml",
-              "RelativeDocumentMoniker": "ExcelEditer\\Pages\\Shared\\_Layout.cshtml",
-              "ToolTip": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\Shared\\_Layout.cshtml",
-              "RelativeToolTip": "ExcelEditer\\Pages\\Shared\\_Layout.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAIBJwBIAAAAZAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-04-17T08:11:38.198Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 18,
+              "DocumentIndex": 20,
               "Title": "bootstrap.css",
               "DocumentMoniker": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.css",
               "RelativeDocumentMoniker": "ExcelEditer\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.css",
@@ -387,18 +395,6 @@
               "ViewState": "AgIAAJ8LAAAAAAAAAAAnwJQLAAAIAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
               "WhenOpened": "2025-05-12T13:51:42.319Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 20,
-              "Title": "Privacy.cshtml",
-              "DocumentMoniker": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\Privacy.cshtml",
-              "RelativeDocumentMoniker": "ExcelEditer\\Pages\\Privacy.cshtml",
-              "ToolTip": "C:\\Users\\anuch\\source\\repos\\ExcelEditer\\ExcelEditer\\Pages\\Privacy.cshtml",
-              "RelativeToolTip": "ExcelEditer\\Pages\\Privacy.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAOAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-04-28T14:46:57.654Z"
             },
             {
               "$type": "Document",

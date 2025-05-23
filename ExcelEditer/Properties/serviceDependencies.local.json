@@ -3,12 +3,6 @@
     "secrets1": {
       "type": "secrets.user"
     },
-    "mssql1": {
-      "secretStore": "LocalSecretsFile",
-      "type": "mssql.onprem",
-      "connectionId": "ConnectionStrings:DefaultConnection1",
-      "dynamicId": null
-    },
     "mssql2": {
       "ignored": "true",
       "type": "mssql",
