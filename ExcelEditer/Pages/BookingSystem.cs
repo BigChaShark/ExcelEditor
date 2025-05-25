@@ -171,6 +171,7 @@ namespace ExcelEditor.Pages
 
         private bool ReserveLogsForUserInRow(UserModel user, int row)
         {
+            DateTime currentDate = DateTime.Now;
             switch (user.Zone)
             {
                 case 3:
@@ -201,20 +202,49 @@ namespace ExcelEditor.Pages
                     และ ถ้าเป็นเคส 7 อาจจะต้องมีการเช็คว่า logCount == 2 ต้อง เริ่มเลขขี้ 1/4 ได้หมด และ ต้องแก้ avilablelogs ให้สอดคล้องกับ การจองของ MU ด้วยการเอา Row ออก
                 */
             }
+            var logeTemp = logeMain;
             var availableLogs = new List<int>();
             if (user.SubZone==7)
             {
-               availableLogs = logeMain
+               availableLogs = logeTemp
                .Where(m => m.IsReserve == 0 && m.LogeZone == user.SubZone).OrderBy(m => m.LogeIndex)
                .Select(m => m.LogeIndex)
                .ToList();
             }
             else
             {
-                availableLogs = logeMain
+                availableLogs = logeTemp
                 .Where(m => m.IsReserve == 0 && m.Row == row && m.LogeZone == user.SubZone)
                 .Select(m => m.LogeID)
                 .ToList();
+            }
+
+            if (user.SubZone==49)
+            {
+                if (currentDate.TimeOfDay < new TimeSpan(21,18,0))
+                {
+                    logeTemp = logeTemp.Where(m => m.LogeSeqNum <= 5).ToList();
+                    availableLogs = logeTemp
+                 .Where(m => m.IsReserve == 0 && m.Row == row && m.LogeZone == user.SubZone)
+                 .Select(m => m.LogeID)
+                 .ToList();
+                }
+                else if (currentDate.TimeOfDay < new TimeSpan(21, 20, 0))
+                {
+                    logeTemp = logeTemp.Where(m => m.LogeSeqNum <=14).ToList();
+                    availableLogs = logeTemp
+                 .Where(m => m.IsReserve == 0 && m.Row == row && m.LogeZone == user.SubZone)
+                 .Select(m => m.LogeID)
+                 .ToList();
+                }
+                else if (currentDate.TimeOfDay > new TimeSpan(21, 25, 0))
+                {
+                    logeTemp = logeTemp.Where(m => m.LogeSeqNum > 5).ToList();
+                    availableLogs = logeTemp
+                 .Where(m => m.IsReserve == 0 && m.Row == row && m.LogeZone == user.SubZone)
+                 .Select(m => m.LogeID)
+                 .ToList();
+                }
             }
 
             

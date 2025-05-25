@@ -202,8 +202,8 @@ namespace ExcelEditor.Pages
                         {
                             string userLogNamesString = string.Join(",", matched.UserLogNames);
                             string userLogIDsString = string.Join(",", matched.UserLogIDs);
-                            sheet.Cells[row, 9].Value = userLogNamesString;
-                            sheet.Cells[row, 10].Value = userLogIDsString;
+                            sheet.Cells[row, 9].Value = userLogIDsString;
+                            sheet.Cells[row, 10].Value = userLogNamesString;
                             sheet.Cells[row, 11].Value = matched.Zone;
                             sheet.Cells[row, 12].Value = matched.SubZone;
                             sheet.Cells[row, 13].Value = matched.ElectricityID;
