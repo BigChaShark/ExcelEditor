@@ -231,7 +231,7 @@ public class IndexModel : PageModel
         bookingSystem.ReserveLogs(users);
         bookingSystem.ShowAllUsers(users);
         bookingSystem.ShowAllAvailableLogs();
-        //bookingSystem.UpdateDB(users);
+        bookingSystem.UpdateDB(users);
         var usersTemp = TempFileManager.SaveUsersToTempFile(users);
         ExcelManager.FillUserLogIDsFromLogStore(originalFilePath, users);
         HttpContext.Session.SetString("FilePath", originalFilePath);

@@ -99,12 +99,14 @@ namespace ExcelEditor.Pages
         }
         public void ReserveLogs(List<UserModel> users)
         {
+            DateTime currentDate = DateTime.Now;
             Random random = new Random();
             //var shuffledUsers = users.OrderByDescending(m => m.LogNum).ThenBy(x => random.Next()).ToList();
             var shuffledUsers = users.OrderBy(m => m.SheetIndex).ThenBy(x => random.Next()).ToList();
-            int currentRow = 1;
+            int currentRow = 0;
             foreach (var user in shuffledUsers)
             {
+                var logeTemp = logeMain;
                 if (user.UserStatus == 1) continue;
                 //if (currentRows.ContainsKey(user.zone))
                 //{
@@ -115,63 +117,78 @@ namespace ExcelEditor.Pages
                 //{
                 //    Console.WriteLine($"Zone not found at User ID : {user.UserID}");
                 //}
-                totalRows = logeMain.Where(m => m.IsReserve == 0 && m.LogeZone == user.SubZone).Select(m => (int?)m.LogeIndex).Max() ?? 0;
-                var indexNow = logeMain.Where(m => m.IsReserve == 0 && m.LogeZone == user.SubZone).OrderBy(m => m.LogeIndex).FirstOrDefault();
-                //Console.WriteLine($"Now Index : {indexNow.LogeIndex}");
-                //currentRow = logeMain.Where(m => m.IsReserve == 0 && m.LogeZone == user.zone).OrderBy(m => m.LogeIndex).Select(m => m.Row).FirstOrDefault();
-                currentRow = indexNow != null ? indexNow.Row : 1;
-                if (ReserveLogsForUserInRow(user, currentRow))
+                
+                if (user.SubZone == 49)
                 {
-                    //currentRow += 1;
-                    //SetRow(user.zone);
+                    if (currentDate.TimeOfDay < new TimeSpan(0, 50, 0))
+                    {
+                        logeTemp = logeTemp.Where(m => m.LogeSeqNum <= 5 && m.IsReserve == 0 && m.LogeZone == user.SubZone).OrderBy(o => o.LogeIndex).ToList();
+                    }
+                    if (currentDate.TimeOfDay >= new TimeSpan(0, 50, 0) && currentDate.TimeOfDay < new TimeSpan(0, 52, 0))
+                    {
+                        var logeZone1 = logeTemp.Where(m => m.LogeSeqNum <= 5 && m.IsReserve == 0 && m.LogeZone == user.SubZone).OrderBy(o => o.LogeIndex).ToList();
+                        var logeZone2 = logeTemp.Where(m => m.LogeSeqNum > 5 && m.IsReserve == 0 && m.LogeZone == user.SubZone).OrderBy(o => o.LogeIndex).ToList();
+                        logeTemp = logeZone1.Concat(logeZone2).ToList();
+                    }
+                    if (currentDate.TimeOfDay >= new TimeSpan(0, 52, 0))
+                    {
+                        logeTemp = logeTemp.Where(m => m.LogeSeqNum > 5 && m.IsReserve == 0 && m.LogeZone == user.SubZone).OrderBy(o => o.LogeIndex).ToList().ToList();
+                    }
                 }
                 else
                 {
-                    if (indexNow == null)
-                    {
-                        Console.WriteLine($"UserID {user.UserOfflineID} No available loge");
-                        continue;
-                    }
-                    for (int i = indexNow.LogeIndex; i <= totalRows; i++)
-                    {
-                        currentRow = logeMain.Where(m => m.IsReserve == 0 && m.LogeZone == user.SubZone && m.LogeIndex == i).Select(m => m.Row).FirstOrDefault();
-                        if (ReserveLogsForUserInRow(user, currentRow))
-                        {
-                            //currentRow += 1;
-                            //SetRow(user.zone);
-                            break;
-                        }
-                    }
-                    //for (int i = currentRow; i <= totalRows; i++)
-                    //{
-                    //    Console.WriteLine($"Try to RS on Index {i}");
-                    //    currentRow = logeMain.Where(m => m.IsReserve == 0 && m.LogeZone == user.zone && m.LogeIndex == i).Select(m => m.Row).FirstOrDefault();
-                    //    if (ReserveLogsForUserInRow(user, user.LogNum, currentRow, user.zone))
-                    //    {
-                    //        //currentRow += 1;
-                    //        //SetRow(user.zone);
-                    //        break;
-                    //    }
-                    //}
+                    logeTemp = logeTemp.Where(m => m.IsReserve == 0 && m.LogeZone == user.SubZone).OrderBy(o => o.LogeIndex).ToList();
                 }
-                //if (currentRow > totalRows)
+                //var logTest = logeTemp.Select(s => s.LogeName).ToList();
+                //Console.WriteLine($"{string.Join(",", logTest)}");
+                //totalRows = logeTemp.Where(m => m.IsReserve == 0 && m.LogeZone == user.SubZone).Select(m => (int?)m.LogeIndex).Max() ?? 0;
+                var indexNow = logeTemp.FirstOrDefault();
+                //Console.WriteLine($"Now Index : {indexNow.LogeIndex}");
+                //currentRow = logeMain.Where(m => m.IsReserve == 0 && m.LogeZone == user.zone).OrderBy(m => m.LogeIndex).Select(m => m.Row).FirstOrDefault();
+                //currentRow = indexNow != null ? indexNow.Row : 1;
+                if (indexNow == null)
+                {
+                    Console.WriteLine($"UserID {user.UserOfflineID} No available loge");
+                    continue;
+                }
+                for (int i = 0; i <= logeTemp.Count - 1; i++)
+                {
+                    //currentRow = logeTemp[i].Row;
+                    if (ReserveLogsForUserInRow(user, logeTemp[i]))
+                    {
+                        //currentRow += 1;
+                        //SetRow(user.zone);
+                        break;
+                    }
+                }
+                //if (ReserveLogsForUserInRow(user, currentRow))
                 //{
-                //    currentRow = 1;
-                //    SetRow(user.zone);
+                //    //currentRow += 1;
+                //    //SetRow(user.zone);
                 //}
+                //else
+                //{
+                //    Console.WriteLine("In loop");
+                //    if (indexNow == null)
+                //    {
+                //        Console.WriteLine($"UserID {user.UserOfflineID} No available loge");
+                //        continue;
+                //    }
+                //    for (int i = 0; i <= logeTemp.Count - 1; i++)
+                //    {
+                //        currentRow = logeTemp[i].Row;
+                //        if (ReserveLogsForUserInRow(user, currentRow))
+                //        {
+                //            //currentRow += 1;
+                //            //SetRow(user.zone);
+                //            break;
+                //        }
+                //    }
             }
-            //void SetRow(int zone)
-            //{
-            //    if (currentRows.ContainsKey(zone))
-            //    {
-            //        currentRows[zone] = currentRow;
-            //    }
-            //}
         }
 
-        private bool ReserveLogsForUserInRow(UserModel user, int row)
+        private bool ReserveLogsForUserInRow(UserModel user, LogeModel loge)
         {
-            DateTime currentDate = DateTime.Now;
             switch (user.Zone)
             {
                 case 3:
@@ -192,15 +209,6 @@ namespace ExcelEditor.Pages
                         return false;
                     }
                     break;
-
-                    /*case 7 :  
-                 var availableLogs = logeMain
-                .Where(m => m.IsReserve == 0 && m.LogeZone == user.SubZone)
-                .Select(m => m.LogeIndex)
-                .ToList(); เอา ล็อค index เช็คไม่ได้ใช้ ID 
-                    
-                    และ ถ้าเป็นเคส 7 อาจจะต้องมีการเช็คว่า logCount == 2 ต้อง เริ่มเลขขี้ 1/4 ได้หมด และ ต้องแก้ avilablelogs ให้สอดคล้องกับ การจองของ MU ด้วยการเอา Row ออก
-                */
             }
             var logeTemp = logeMain;
             var availableLogs = new List<int>();
@@ -214,39 +222,10 @@ namespace ExcelEditor.Pages
             else
             {
                 availableLogs = logeTemp
-                .Where(m => m.IsReserve == 0 && m.Row == row && m.LogeZone == user.SubZone)
+                .Where(m => m.IsReserve == 0 && m.Row == loge.Row && m.LogeID >= loge.LogeID).OrderBy(m => m.LogeID)
                 .Select(m => m.LogeID)
                 .ToList();
             }
-
-            if (user.SubZone==49)
-            {
-                if (currentDate.TimeOfDay < new TimeSpan(21,18,0))
-                {
-                    logeTemp = logeTemp.Where(m => m.LogeSeqNum <= 5).ToList();
-                    availableLogs = logeTemp
-                 .Where(m => m.IsReserve == 0 && m.Row == row && m.LogeZone == user.SubZone)
-                 .Select(m => m.LogeID)
-                 .ToList();
-                }
-                else if (currentDate.TimeOfDay < new TimeSpan(21, 20, 0))
-                {
-                    logeTemp = logeTemp.Where(m => m.LogeSeqNum <=14).ToList();
-                    availableLogs = logeTemp
-                 .Where(m => m.IsReserve == 0 && m.Row == row && m.LogeZone == user.SubZone)
-                 .Select(m => m.LogeID)
-                 .ToList();
-                }
-                else if (currentDate.TimeOfDay > new TimeSpan(21, 25, 0))
-                {
-                    logeTemp = logeTemp.Where(m => m.LogeSeqNum > 5).ToList();
-                    availableLogs = logeTemp
-                 .Where(m => m.IsReserve == 0 && m.Row == row && m.LogeZone == user.SubZone)
-                 .Select(m => m.LogeID)
-                 .ToList();
-                }
-            }
-
             
             if (availableLogs.Count > 0)
             {
@@ -260,7 +239,7 @@ namespace ExcelEditor.Pages
                     }
                     else
                     {
-                        names = logeMain.Where(m => selectedLogs.Contains(m.LogeID) && m.Row == row).Select(m => m.LogeName).ToList();
+                        names = logeMain.Where(m => selectedLogs.Contains(m.LogeID) && m.Row == loge.Row).Select(m => m.LogeName).ToList();
                     }
                     user.UserLogIDs.AddRange(selectedLogs);
                     user.UserLogNames.AddRange(names);
@@ -270,7 +249,7 @@ namespace ExcelEditor.Pages
                     Console.WriteLine($"UserID {user.UserOfflineID} RS {user.LogNum} log SUC...: {string.Join(", ", names)}");
                     return true;
                 }
-                Console.WriteLine($"UserID {user.UserOfflineID} Can't RS on Row {row}");
+                Console.WriteLine($"UserID {user.UserOfflineID} Can't RS on Row {loge.Row}");
                 return false;
             }
             else
@@ -299,18 +278,22 @@ namespace ExcelEditor.Pages
             }
             else
             {
-                for (int i = 0; i <= availableLogs.Count - logCount; i++)
+                var subset = availableLogs.Take((int)logCount).ToList();
+                if (subset.Count == logCount && IsConsecutive(subset))
                 {
-                    var subset = availableLogs.Skip(i).Take((int)logCount).ToList();
-                    if (subset.Count == logCount && IsConsecutive(subset) && CountCornerLogs(subset) <= 1)
-                    {
-                        return subset;
-                    }
+                    return subset;
                 }
                 return null;
+                //for (int i = 0; i <= availableLogs.Count - logCount; i++)
+                //{
+                //    var subset = availableLogs.Skip(i).Take((int)logCount).ToList();
+                //    if (subset.Count == logCount && IsConsecutive(subset))
+                //    {
+                //        return subset;
+                //    }
+                //}
+                //return null;
             }
-            return null;
-            /* ของ Case 7 ถ้า logCount == 2 ต้อง เริ่มเลขขี้ 1/4 ได้หมด */
 
         }
 
