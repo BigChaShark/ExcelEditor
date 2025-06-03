@@ -300,7 +300,7 @@ public class IndexModel : PageModel
             {
                 var user = users[i];
                 message = user.Message;
-                _smsManager.SendSMS(user.Mobile, message);
+                _smsManager.SendSMS($"0{user.Mobile}", message);
             }
             return new OkResult();
         }
